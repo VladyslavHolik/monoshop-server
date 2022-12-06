@@ -11,68 +11,56 @@ datasource db {
 }
 
 model User {
-  id       Int       @id @default(autoincrement())
-  email    String    @unique
+  id       Int     @id @default(autoincrement())
+  email    String  @unique
   fullName String
   password String
   items    Item[]
-  location Location?
+  location String
   phone    String?
   image    String?
 }
 
-model Location {
-  id     Int    @id @default(autoincrement())
-  name   String
-  user   User   @relation(fields: [userId], references: [id])
-  userId Int    @unique
-}
-
 model Item {
-  id        Int       @id @default(autoincrement())
-  user      User      @relation(fields: [userId], references: [id])
+  id        Int        @id @default(autoincrement())
+  user      User       @relation(fields: [userId], references: [id])
   userId    Int
-  style     Style?
+  style     Style[]
   images    String[]
   price     Int
-  size      Size?
-  category  Category?
-  brand     Brand?
-  colour    Colour?
+  size      Size[]
+  category  Category[]
+  brand     Brand[]
+  colour    Colour[]
   condition Int
 }
 
 model Size {
-  id     Int    @id @default(autoincrement())
-  name   String @unique
-  item   Item?  @relation(fields: [itemId], references: [id])
-  itemId Int?   @unique
+  id   Int    @id @default(autoincrement())
+  name String @unique
+  item Item[]
 }
 
 model Colour {
-  id     Int    @id @default(autoincrement())
-  name   String @unique
-  item   Item?  @relation(fields: [itemId], references: [id])
-  itemId Int?   @unique
+  id   Int    @id @default(autoincrement())
+  name String @unique
+  item Item[]
 }
 
 model Category {
-  id     Int    @id @default(autoincrement())
-  name   String @unique
-  item   Item?  @relation(fields: [itemId], references: [id])
-  itemId Int?   @unique
+  id   Int    @id @default(autoincrement())
+  name String @unique
+  item Item[]
 }
 
 model Style {
-  id     Int    @id @default(autoincrement())
-  name   String @unique
-  item   Item?  @relation(fields: [itemId], references: [id])
-  itemId Int?   @unique
+  id   Int    @id @default(autoincrement())
+  name String @unique
+  item Item[]
 }
 
 model Brand {
-  id     Int    @id @default(autoincrement())
-  name   String @unique
-  item   Item?  @relation(fields: [itemId], references: [id])
-  itemId Int?   @unique
+  id   Int    @id @default(autoincrement())
+  name String @unique
+  item Item[]
 }
