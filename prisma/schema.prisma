@@ -1,0 +1,78 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       Int       @id @default(autoincrement())
+  email    String    @unique
+  fullName String
+  password String
+  items    Item[]
+  location Location?
+  phone    String?
+  image    String?
+}
+
+model Location {
+  id     Int    @id @default(autoincrement())
+  name   String
+  user   User   @relation(fields: [userId], references: [id])
+  userId Int    @unique
+}
+
+model Item {
+  id        Int       @id @default(autoincrement())
+  user      User      @relation(fields: [userId], references: [id])
+  userId    Int
+  style     Style?
+  images    String[]
+  price     Int
+  size      Size?
+  category  Category?
+  brand     Brand?
+  colour    Colour?
+  condition Int
+}
+
+model Size {
+  id     Int    @id @default(autoincrement())
+  name   String @unique
+  item   Item?  @relation(fields: [itemId], references: [id])
+  itemId Int?   @unique
+}
+
+model Colour {
+  id     Int    @id @default(autoincrement())
+  name   String @unique
+  item   Item?  @relation(fields: [itemId], references: [id])
+  itemId Int?   @unique
+}
+
+model Category {
+  id     Int    @id @default(autoincrement())
+  name   String @unique
+  item   Item?  @relation(fields: [itemId], references: [id])
+  itemId Int?   @unique
+}
+
+model Style {
+  id     Int    @id @default(autoincrement())
+  name   String @unique
+  item   Item?  @relation(fields: [itemId], references: [id])
+  itemId Int?   @unique
+}
+
+model Brand {
+  id     Int    @id @default(autoincrement())
+  name   String @unique
+  item   Item?  @relation(fields: [itemId], references: [id])
+  itemId Int?   @unique
+}
