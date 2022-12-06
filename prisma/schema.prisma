@@ -16,7 +16,7 @@ model User {
   fullName String
   password String
   items    Item[]
-  location String
+  location String?
   phone    String?
   image    String?
 }
@@ -27,7 +27,7 @@ model Item {
   userId     Int
   style      Style    @relation(fields: [styleId], references: [id])
   styleId    Int
-  images     String
+  images     String[]
   price      Int
   size       Size?    @relation(fields: [sizeId], references: [id])
   sizeId     Int

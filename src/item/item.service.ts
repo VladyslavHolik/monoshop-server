@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateItemDto } from './dto/create-item.dto';
+import { EditItemDto } from './dto/edit-item.dto';
 
 @Injectable()
 export class ItemService {
@@ -44,5 +45,25 @@ export class ItemService {
     });
 
     return userItems;
+  }
+
+  async getItem(id: string) {
+    return await this.prisma.item.findUnique({ where: { id: Number(id) } });
+  }
+
+  async editItem(id: string, dto: EditItemDto) {
+    const editedItem = await this.prisma.item.update({
+      where: { id: Number(id) },
+      data: {
+        ...dto,
+      },
+    });
+    return editedItem;
+  }
+
+  async delete(id: string) {
+    await this.prisma.item.delete({ where: { id: Number(id) } });
+
+    return { message: 'Item deleted succsfully' };
   }
 }
