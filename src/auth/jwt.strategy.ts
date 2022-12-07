@@ -4,6 +4,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { Request } from 'express';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { User } from '@prisma/client';
+import { Request as HttpRequest } from 'express';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -34,3 +35,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     return user;
   }
 }
+
+interface UserJwtPayload {
+  id: number;
+}
+
+export type AuthRequest = HttpRequest & { user: UserJwtPayload };

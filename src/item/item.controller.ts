@@ -9,16 +9,12 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { Request as HttpRequest } from 'express';
+
 import { JwtAuthGuard } from 'src/auth/auth.guard';
+import { AuthRequest } from 'src/auth/jwt.strategy';
 import { CreateItemDto } from './dto/create-item.dto';
 import { EditItemDto } from './dto/edit-item.dto';
 import { ItemService } from './item.service';
-
-interface UserJwtPayload {
-  id: number;
-}
-type AuthRequest = HttpRequest & { user: UserJwtPayload };
 
 @Controller('item')
 export class ItemController {

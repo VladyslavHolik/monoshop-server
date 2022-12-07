@@ -19,6 +19,12 @@ model User {
   location String?
   phone    String?
   image    String?
+  role     Role    @default(USER)
+}
+
+enum Role {
+  USER
+  ADMIN
 }
 
 model Item {
@@ -29,7 +35,7 @@ model Item {
   styleId    Int
   images     String[]
   price      Int
-  size       Size?    @relation(fields: [sizeId], references: [id])
+  size       Size     @relation(fields: [sizeId], references: [id])
   sizeId     Int
   category   Category @relation(fields: [categoryId], references: [id])
   categoryId Int

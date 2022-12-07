@@ -1,6 +1,19 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Put,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/auth.guard';
+import { AuthRequest } from 'src/auth/jwt.strategy';
+import Role from 'src/auth/role.enum';
+import RoleGuard from 'src/auth/roles.guard';
 import { CreateUserDto } from './dto/create-user.dto';
+import { EditUserDto } from './dto/edit-user.dto';
 import { UserService } from './user.service';
 
 @Controller('user')
@@ -12,7 +25,7 @@ export class UserController {
     return this.userService.createUser(userDto);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RoleGuard(Role.Admin))
   @Get()
   getAll() {
     return this.userService.getAllUsers();
@@ -22,5 +35,12 @@ export class UserController {
   @Get(':id')
   getMyUser(@Param('id') id: string) {
     return this.userService.getMyUser(Number(id));
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Put()
+  editUser(@Req() req: AuthRequest, @Body() dto: EditUserDto) {
+    const { user } = req;
+    return this.userService.editUser(user.id, dto);
   }
 }
