@@ -29,25 +29,23 @@ enum Role {
 }
 
 model Item {
-  // users User[]
-  id             Int      @id @default(autoincrement())
-  user           User     @relation("items", fields: [userId], references: [id])
-  userId         Int
-  favoriteUser   User     @relation("favorites", fields: [favoriteUserId], references: [id])
-  favoriteUserId Int
-  style          Style    @relation(fields: [styleId], references: [id])
-  styleId        Int
-  images         String[]
-  price          Int
-  size           Size     @relation(fields: [sizeId], references: [id])
-  sizeId         Int
-  category       Category @relation(fields: [categoryId], references: [id])
-  categoryId     Int
-  brand          Brand    @relation(fields: [brandId], references: [id])
-  brandId        Int
-  colour         Colour   @relation(fields: [colourId], references: [id])
-  colourId       Int
-  condition      Int
+  id            Int      @id @default(autoincrement())
+  user          User     @relation("items", fields: [userId], references: [id])
+  userId        Int
+  favoriteUsers User[]   @relation("favorites")
+  style         Style    @relation(fields: [styleId], references: [id])
+  styleId       Int
+  images        String[]
+  price         Int
+  size          Size     @relation(fields: [sizeId], references: [id])
+  sizeId        Int
+  category      Category @relation(fields: [categoryId], references: [id])
+  categoryId    Int
+  brand         Brand    @relation(fields: [brandId], references: [id])
+  brandId       Int
+  colour        Colour   @relation(fields: [colourId], references: [id])
+  colourId      Int
+  condition     Int
 }
 
 model Size {

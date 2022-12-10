@@ -40,6 +40,7 @@ export class ItemController {
   }
 
   @Put(':id')
+  @UseGuards(JwtAuthGuard)
   editItem(@Param('id') id: string, @Body() dto: EditItemDto) {
     return this.itemService.editItem(id, dto);
   }

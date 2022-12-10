@@ -21,6 +21,7 @@ export class UserService {
         phone: true,
         image: true,
         location: true,
+        favorites: true,
       },
     });
     return users;
@@ -32,7 +33,24 @@ export class UserService {
   }
 
   async getMyUser(id: number) {
-    return this.prisma.user.findUnique({ where: { id } });
+    return this.prisma.user.findUnique({
+      where: { id },
+      select: {
+        items: true,
+        email: true,
+        favorites: {
+          select: {
+            images: true,
+            brand: true,
+            size: true,
+            category: true,
+          },
+        },
+        image: true,
+        phone: true,
+        location: true,
+      },
+    });
   }
 
   async editUser(id: number, dto: EditUserDto) {

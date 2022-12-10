@@ -14,6 +14,7 @@ import { SizeModule } from './size/size.module';
 import { CategoryModule } from './category/category.module';
 import { BrandModule } from './brand/brand.module';
 import { ColourModule } from './colour/colour.module';
+import { FavoriteModule } from './favorite/favorite.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { ColourModule } from './colour/colour.module';
     CategoryModule,
     BrandModule,
     ColourModule,
+    FavoriteModule,
   ],
   controllers: [AuthController, UserController, ItemController],
   providers: [AuthService, JwtService, ItemService],
