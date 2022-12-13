@@ -28,6 +28,11 @@ enum Role {
   ADMIN
 }
 
+enum Gender {
+  WOMEN
+  MEN
+}
+
 model Item {
   id            Int      @id @default(autoincrement())
   user          User     @relation("items", fields: [userId], references: [id])
@@ -46,7 +51,10 @@ model Item {
   colour        Colour   @relation(fields: [colourId], references: [id])
   colourId      Int
   condition     Int
+  gender Gender?
 }
+
+
 
 model Size {
   id   Int    @id @default(autoincrement())
@@ -64,6 +72,7 @@ model Category {
   id   Int    @id @default(autoincrement())
   name String @unique
   item Item[]
+  gender Gender?
 }
 
 model Style {

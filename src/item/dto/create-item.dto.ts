@@ -1,4 +1,5 @@
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { Gender } from '@prisma/client';
 
 export class CreateItemDto {
   @IsNotEmpty()
@@ -6,6 +7,10 @@ export class CreateItemDto {
 
   @IsNotEmpty()
   images: string[];
+
+  @IsNotEmpty()
+  @IsEnum(Gender)
+  gender: Gender;
 
   @IsNotEmpty()
   @IsNumber()

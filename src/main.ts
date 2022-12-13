@@ -11,6 +11,11 @@ async function bootstrap() {
     }),
   );
   app.use(cookieParser());
-  await app.listen(3000);
+  app.enableCors({
+    allowedHeaders: ['content-type'],
+    origin: 'http://localhost:3000',
+    credentials: true,
+  });
+  await app.listen(5000);
 }
 bootstrap();

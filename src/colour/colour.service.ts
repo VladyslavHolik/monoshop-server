@@ -6,6 +6,7 @@ import { AddColourDto } from './dto/add-colour.dto';
 export class ColourService {
   constructor(private prisma: PrismaService) {}
 
+  
   async addColour(dto: AddColourDto) {
     const candidate = await this.prisma.colour.findFirst({
       where: { name: dto.name },

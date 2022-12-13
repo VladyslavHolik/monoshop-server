@@ -19,6 +19,7 @@ export class ItemService {
         images: dto.images,
         size: { connect: { name: dto.size } },
         style: { connect: { name: dto.style } },
+        gender: dto.gender,
       },
       include: {
         size: true,
