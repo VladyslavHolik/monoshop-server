@@ -18,7 +18,7 @@ model User {
   items     Item[]  @relation("items")
   location  String?
   phone     String?
-  image     String?
+  image     String  @default("https://t4.ftcdn.net/jpg/01/86/29/31/360_F_186293166_P4yk3uXQBDapbDFlR17ivpM6B1ux0fHG.jpg")
   role      Role    @default(USER)
   favorites Item[]  @relation("favorites")
 }
@@ -33,6 +33,16 @@ enum Gender {
   MEN
 }
 
+enum Size {
+  XS
+  S
+  M
+  L
+  XL
+  XXL
+  XXXL
+}
+
 model Item {
   id            Int      @id @default(autoincrement())
   user          User     @relation("items", fields: [userId], references: [id])
@@ -42,8 +52,8 @@ model Item {
   styleId       Int
   images        String[]
   price         Int
-  size          Size     @relation(fields: [sizeId], references: [id])
-  sizeId        Int
+  description String?
+  size          Size 
   category      Category @relation(fields: [categoryId], references: [id])
   categoryId    Int
   brand         Brand    @relation(fields: [brandId], references: [id])
@@ -51,38 +61,31 @@ model Item {
   colour        Colour   @relation(fields: [colourId], references: [id])
   colourId      Int
   condition     Int
-  gender Gender?
-}
-
-
-
-model Size {
-  id   Int    @id @default(autoincrement())
-  name String @unique
-  item Item[]
+  gender Gender
 }
 
 model Colour {
   id   Int    @id @default(autoincrement())
-  name String @unique
+  value String @unique
+  hexCode String @unique
   item Item[]
 }
 
 model Category {
   id   Int    @id @default(autoincrement())
-  name String @unique
+  value String 
   item Item[]
-  gender Gender?
+  gender Gender
 }
 
 model Style {
   id   Int    @id @default(autoincrement())
-  name String @unique
+  value String @unique
   item Item[]
 }
 
 model Brand {
   id   Int    @id @default(autoincrement())
-  name String @unique
+  value String @unique
   item Item[]
 }

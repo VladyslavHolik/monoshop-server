@@ -8,7 +8,7 @@ export class BrandService {
 
   async addBrand(dto: AddBrandDto) {
     const candidate = await this.prisma.brand.findFirst({
-      where: { name: dto.name },
+      where: { value: dto.value },
     });
 
     if (candidate) {
@@ -19,6 +19,17 @@ export class BrandService {
   }
 
   async getAll() {
-    return this.prisma.brand.findMany({ select: { id: true, name: true } });
+    const brands = await this.prisma.brand.findMany({
+      select: { value: true },
+    });
+
+    const mapped = brands.map((item) => {
+      return {
+        ...item,
+        label: item.value,
+      };
+    });
+
+    return mapped;
   }
 }

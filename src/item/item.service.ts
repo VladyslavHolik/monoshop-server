@@ -2,6 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateItemDto } from './dto/create-item.dto';
 import { EditItemDto } from './dto/edit-item.dto';
+import { IFilter } from './item.controller';
+
+const getTotalPages = (totalItems: number, limit: number) => {
+  return Math.ceil(totalItems / limit);
+};
+
+const ITEMS_LIMIT = 12;
 
 @Injectable()
 export class ItemService {
@@ -13,43 +20,174 @@ export class ItemService {
         user: { connect: { id: userId } },
         condition: dto.condition,
         price: dto.price,
-        brand: { connect: { name: dto.brand } },
-        category: { connect: { name: dto.category } },
-        colour: { connect: { name: dto.colour } },
+        description: dto.description,
+        brand: { connect: { value: dto.brand } },
+        category: { connect: { id: dto.categoryId } },
+        colour: { connect: { value: dto.colour } },
         images: dto.images,
-        size: { connect: { name: dto.size } },
-        style: { connect: { name: dto.style } },
+        size: dto.size,
+        style: { connect: { value: dto.style } },
         gender: dto.gender,
       },
-      include: {
-        size: true,
+      select: {
+        id: true,
         brand: true,
         category: true,
-        colour: true,
-        style: true,
+        price: true,
       },
     });
 
     return item;
   }
 
-  async getAll(userId: number) {
-    const userItems = await this.prisma.item.findMany({
-      where: { userId },
-      include: {
+  async getAll(query: IFilter) {
+    const {
+      brand,
+      category,
+      colour,
+      condition,
+      filterBy,
+      gender,
+      price,
+      size,
+      style,
+      page,
+    } = query;
+
+    const items = await this.prisma.item.findMany({
+      where: {
+        price: {
+          gt: price[0],
+          lt: price[1],
+        },
+        AND: [
+          {
+            category: {
+              value: {
+                in: category,
+              },
+            },
+          },
+          {
+            brand: {
+              value: {
+                in: brand,
+              },
+            },
+          },
+          {
+            condition: {
+              in: condition,
+            },
+          },
+          {
+            size: {
+              in: size,
+            },
+          },
+          {
+            style: {
+              value: {
+                in: style,
+              },
+            },
+          },
+        ],
+
+        gender: gender,
+        colour: {
+          value: {
+            in: colour,
+          },
+        },
+      },
+      take: ITEMS_LIMIT,
+      skip: (page - 1) * ITEMS_LIMIT,
+      select: {
+        images: true,
+        price: true,
+        id: true,
+        category: true,
+        gender: true,
+        colour: true,
+        size: true,
+      },
+    });
+
+    const count = await this.prisma.item.count({
+      where: {
+        price: {
+          gt: price[0],
+          lt: price[1],
+        },
+        AND: [
+          {
+            category: {
+              value: {
+                in: category,
+              },
+            },
+          },
+          {
+            brand: {
+              value: {
+                in: brand,
+              },
+            },
+          },
+          {
+            condition: {
+              in: condition,
+            },
+          },
+          {
+            size: {
+              in: size,
+            },
+          },
+          {
+            style: {
+              value: {
+                in: style,
+              },
+            },
+          },
+        ],
+
+        gender: gender,
+        colour: {
+          value: {
+            in: colour,
+          },
+        },
+      },
+    });
+
+    return {
+      data: items,
+      meta: {
+        total: count,
+      },
+    };
+  }
+
+  async getItem(id: string) {
+    return await this.prisma.item.findUnique({
+      where: { id: Number(id) },
+      select: {
+        images: true,
+        gender: true,
         brand: true,
         category: true,
         colour: true,
         size: true,
+        condition: true,
+        user: true,
+        price: true,
         style: true,
+        description: true,
       },
     });
-
-    return userItems;
-  }
-
-  async getItem(id: string) {
-    return await this.prisma.item.findUnique({ where: { id: Number(id) } });
   }
 
   async editItem(id: string, dto: EditItemDto) {

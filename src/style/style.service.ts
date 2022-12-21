@@ -7,8 +7,8 @@ export class StyleService {
   constructor(private prisma: PrismaService) {}
 
   async addStyle(dto: AddStyleDto) {
-    const candidate = await this.prisma.size.findFirst({
-      where: { name: dto.name },
+    const candidate = await this.prisma.style.findFirst({
+      where: { value: dto.value },
     });
 
     if (candidate) {
@@ -19,6 +19,17 @@ export class StyleService {
   }
 
   async getAll() {
-    return this.prisma.style.findMany({ select: { id: true, name: true } });
+    const styles = await this.prisma.style.findMany({
+      select: { value: true },
+    });
+
+    const mapped = styles.map((item) => {
+      return {
+        ...item,
+        label: item.value,
+      };
+    });
+
+    return mapped;
   }
 }

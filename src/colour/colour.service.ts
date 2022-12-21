@@ -6,20 +6,31 @@ import { AddColourDto } from './dto/add-colour.dto';
 export class ColourService {
   constructor(private prisma: PrismaService) {}
 
-  
   async addColour(dto: AddColourDto) {
     const candidate = await this.prisma.colour.findFirst({
-      where: { name: dto.name },
+      where: { value: dto.value },
     });
 
     if (candidate) {
       throw new HttpException('Colour already exists', HttpStatus.FORBIDDEN);
     }
 
-    return this.prisma.colour.create({ data: dto });
+    return await this.prisma.colour.create({ data: dto });
   }
 
   async getAll() {
-    return this.prisma.colour.findMany({ select: { id: true, name: true } });
+    const colors = await this.prisma.colour.findMany({
+      select: { value: true, hexCode: true },
+
+    });
+
+    const mapped = colors.map((item) => {
+      return {
+        ...item,
+        label: item.value,
+      };
+    });
+
+    return mapped;
   }
 }

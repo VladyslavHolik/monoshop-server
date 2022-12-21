@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
+import { Gender } from '@prisma/client';
 import { JwtAuthGuard } from 'src/auth/auth.guard';
 import Role from 'src/auth/role.enum';
 import RoleGuard from 'src/auth/roles.guard';
@@ -10,8 +19,8 @@ export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
   @Get()
-  getAll() {
-    return this.categoryService.getAll();
+  getAll(@Query() query: { [gender: string]: Gender }) {
+    return this.categoryService.getAll(query.gender);
   }
 
   @Post()

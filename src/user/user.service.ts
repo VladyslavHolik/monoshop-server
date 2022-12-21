@@ -38,6 +38,7 @@ export class UserService {
       select: {
         items: true,
         email: true,
+        role: true,
         favorites: {
           select: {
             images: true,

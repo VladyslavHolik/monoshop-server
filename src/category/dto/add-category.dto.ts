@@ -4,7 +4,7 @@ import { Gender } from '@prisma/client';
 export class AddCategoryDto {
   @IsNotEmpty()
   @IsString()
-  name: string;
+  value: string;
 
   @IsNotEmpty()
   @IsEnum(Gender)

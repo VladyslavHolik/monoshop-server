@@ -1,11 +1,27 @@
-import { IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
-import { Gender } from '@prisma/client';
+import {
+  ArrayNotEmpty,
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+  ArrayMaxSize,
+  ArrayMinSize,
+  Min,
+  Max,
+  IsOptional,
+  MinLength,
+  MaxLength,
+} from 'class-validator';
+import { Colour, Gender, Size } from '@prisma/client';
 
 export class CreateItemDto {
   @IsNotEmpty()
   style: string;
 
   @IsNotEmpty()
+  @ArrayNotEmpty()
+  @ArrayMaxSize(5)
+  @ArrayMinSize(1)
   images: string[];
 
   @IsNotEmpty()
@@ -18,11 +34,12 @@ export class CreateItemDto {
 
   @IsNotEmpty()
   @IsString()
-  size: string;
+  @IsEnum(Size)
+  size: Size;
 
-  @IsString()
   @IsNotEmpty()
-  category: string;
+  @IsNumber()
+  categoryId: number;
 
   @IsNotEmpty()
   @IsString()
@@ -34,5 +51,13 @@ export class CreateItemDto {
 
   @IsNotEmpty()
   @IsNumber()
+  @Min(1)
+  @Max(10)
   condition: number;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(10)
+  @MaxLength(200)
+  description: string;
 }
