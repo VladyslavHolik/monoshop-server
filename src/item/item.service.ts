@@ -28,6 +28,8 @@ export class ItemService {
         size: dto.size,
         style: { connect: { value: dto.style } },
         gender: dto.gender,
+        name: dto.name,
+        hashtags: dto.hashtags,
       },
       select: {
         id: true,

@@ -32,6 +32,28 @@ export class UserService {
     return user;
   }
 
+  async getUserById(id: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      select: {
+        email: true,
+        fullName: true,
+        items: {
+          select: {
+            id: true,
+            price: true,
+            images: true,
+          },
+        },
+        image: true,
+        phone: true,
+        location: true,
+      },
+    });
+
+    return user;
+  }
+
   async getMyUser(id: number) {
     return this.prisma.user.findUnique({
       where: { id },

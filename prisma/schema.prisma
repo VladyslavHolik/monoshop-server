@@ -62,6 +62,8 @@ model Item {
   colourId      Int
   condition     Int
   gender Gender
+  name String
+  hashtags String[] @default([])
 }
 
 model Colour {

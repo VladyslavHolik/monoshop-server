@@ -31,10 +31,14 @@ export class UserController {
     return this.userService.getAllUsers();
   }
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
+  // @Get(':id')
+  // getMyUser(@Param('id') id: string) {
+  //   return this.userService.getMyUser(Number(id));
+  // }
   @Get(':id')
-  getMyUser(@Param('id') id: string) {
-    return this.userService.getMyUser(Number(id));
+  getUserById(@Param('id') id: string) {
+    return this.userService.getUserById(Number(id));
   }
 
   @UseGuards(JwtAuthGuard)

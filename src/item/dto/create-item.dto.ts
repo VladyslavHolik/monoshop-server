@@ -24,6 +24,11 @@ export class CreateItemDto {
   @ArrayMinSize(1)
   images: string[];
 
+  @IsOptional()
+  @ArrayMaxSize(10)
+  @ArrayMinSize(1)
+  hashtags: string[];
+
   @IsNotEmpty()
   @IsEnum(Gender)
   gender: Gender;
@@ -60,4 +65,10 @@ export class CreateItemDto {
   @MinLength(10)
   @MaxLength(200)
   description: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(4)
+  @MaxLength(50)
+  name: string;
 }
