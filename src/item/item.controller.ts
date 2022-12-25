@@ -5,22 +5,18 @@ import {
   Get,
   Param,
   ParseArrayPipe,
-  ParseFilePipe,
-  ParseIntPipe,
   Post,
   Put,
   Query,
   Req,
   UseGuards,
-  ValidationPipe,
 } from '@nestjs/common';
-import { Gender, Size } from '@prisma/client';
+import { Gender, Size, User } from '@prisma/client';
 
 import { JwtAuthGuard } from 'src/auth/auth.guard';
 import { AuthRequest } from 'src/auth/jwt.strategy';
 import { CreateItemDto } from './dto/create-item.dto';
 import { EditItemDto } from './dto/edit-item.dto';
-import { PageMetaDto } from './dto/page-meta.dto';
 import { FilterBy } from './filter-by.enum';
 import { ItemService } from './item.service';
 
@@ -111,12 +107,12 @@ export class ItemController {
     });
   }
 
-  // @Get(':id')
-  // @UseGuards(JwtAuthGuard)
-  // getUserItems(@Req() req: AuthRequest) {
-  //   const { user } = req;
-  //   return '...';
-  // }
+  @Get('user')
+  @UseGuards(JwtAuthGuard)
+  getUserItems(@Req() req: AuthRequest) {
+    const { user } = req;
+    return this.itemService.getUserItems(user.id);
+  }
 
   @Get(':id')
   getItem(@Param('id') id: string) {

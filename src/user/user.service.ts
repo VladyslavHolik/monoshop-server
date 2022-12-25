@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { User } from '@prisma/client';
+import { AuthRequest } from 'src/auth/jwt.strategy';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { EditUserDto } from './dto/edit-user.dto';
@@ -54,24 +56,10 @@ export class UserService {
     return user;
   }
 
-  async getMyUser(id: number) {
+  async getProfile(id: number) {
     return this.prisma.user.findUnique({
-      where: { id },
-      select: {
-        items: true,
-        email: true,
-        role: true,
-        favorites: {
-          select: {
-            images: true,
-            brand: true,
-            size: true,
-            category: true,
-          },
-        },
-        image: true,
-        phone: true,
-        location: true,
+      where: {
+        id,
       },
     });
   }

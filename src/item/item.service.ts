@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateItemDto } from './dto/create-item.dto';
 import { EditItemDto } from './dto/edit-item.dto';
@@ -173,6 +174,14 @@ export class ItemService {
     };
   }
 
+  async getUserItems(id: number) {
+    return this.prisma.item.findMany({
+      where: {
+        userId: id,
+      },
+    });
+  }
+
   async getItem(id: string) {
     return await this.prisma.item.findUnique({
       where: { id: Number(id) },
@@ -188,6 +197,8 @@ export class ItemService {
         price: true,
         style: true,
         description: true,
+        name: true,
+        hashtags: true,
       },
     });
   }

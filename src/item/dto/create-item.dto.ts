@@ -26,7 +26,6 @@ export class CreateItemDto {
 
   @IsOptional()
   @ArrayMaxSize(10)
-  @ArrayMinSize(1)
   hashtags: string[];
 
   @IsNotEmpty()
