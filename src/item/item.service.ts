@@ -186,6 +186,7 @@ export class ItemService {
     return await this.prisma.item.findUnique({
       where: { id: Number(id) },
       select: {
+        id: true,
         images: true,
         gender: true,
         brand: true,
@@ -207,7 +208,18 @@ export class ItemService {
     const editedItem = await this.prisma.item.update({
       where: { id: Number(id) },
       data: {
-        ...dto,
+        condition: dto.condition,
+        price: dto.price,
+        description: dto.description,
+        brand: { connect: { value: dto.brand } },
+        category: { connect: { id: dto.categoryId } },
+        colour: { connect: { value: dto.colour } },
+        images: dto.images,
+        size: dto.size,
+        style: { connect: { value: dto.style } },
+        gender: dto.gender,
+        name: dto.name,
+        hashtags: dto.hashtags,
       },
     });
     return editedItem;

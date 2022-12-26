@@ -78,6 +78,14 @@ model Category {
   value String 
   item Item[]
   gender Gender
+  subcategory Subcategory[]
+}
+
+model Subcategory {
+  id Int @id @default(autoincrement())
+  value String
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId Int @unique
 }
 
 model Style {

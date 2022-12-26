@@ -26,7 +26,7 @@ export class CategoryService {
       where: {
         gender: gender,
       },
-      select: { value: true, gender: true, id: true },
+      select: { value: true, gender: true, id: true, subcategory: true },
     });
 
     const mapped = categories.map((category) => {
