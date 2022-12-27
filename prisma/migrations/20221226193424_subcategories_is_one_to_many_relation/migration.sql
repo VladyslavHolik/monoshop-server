@@ -15,7 +15,7 @@ CREATE TABLE "User" (
     "password" TEXT NOT NULL,
     "location" TEXT,
     "phone" TEXT,
-    "image" TEXT,
+    "image" TEXT NOT NULL DEFAULT 'https://t4.ftcdn.net/jpg/01/86/29/31/360_F_186293166_P4yk3uXQBDapbDFlR17ivpM6B1ux0fHG.jpg',
     "role" "Role" NOT NULL DEFAULT 'USER',
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
@@ -35,6 +35,8 @@ CREATE TABLE "Item" (
     "colourId" INTEGER NOT NULL,
     "condition" INTEGER NOT NULL,
     "gender" "Gender" NOT NULL,
+    "name" TEXT NOT NULL,
+    "hashtags" TEXT[] DEFAULT ARRAY[]::TEXT[],
 
     CONSTRAINT "Item_pkey" PRIMARY KEY ("id")
 );
@@ -55,6 +57,15 @@ CREATE TABLE "Category" (
     "gender" "Gender" NOT NULL,
 
     CONSTRAINT "Category_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Subcategory" (
+    "id" SERIAL NOT NULL,
+    "value" TEXT NOT NULL,
+    "categoryId" INTEGER NOT NULL,
+
+    CONSTRAINT "Subcategory_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -114,6 +125,9 @@ ALTER TABLE "Item" ADD CONSTRAINT "Item_brandId_fkey" FOREIGN KEY ("brandId") RE
 
 -- AddForeignKey
 ALTER TABLE "Item" ADD CONSTRAINT "Item_colourId_fkey" FOREIGN KEY ("colourId") REFERENCES "Colour"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Subcategory" ADD CONSTRAINT "Subcategory_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_favorites" ADD CONSTRAINT "_favorites_A_fkey" FOREIGN KEY ("A") REFERENCES "Item"("id") ON DELETE CASCADE ON UPDATE CASCADE;

@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   ParseArrayPipe,
+  ParseIntPipe,
   Post,
   Put,
   Query,
@@ -23,7 +24,8 @@ import { ItemService } from './item.service';
 export interface IFilter {
   price?: [number, number];
   gender?: Gender;
-  category?: string[];
+  category?: number;
+  subcategory?: number[];
   size?: Size[];
   condition?: number[];
   brand?: string[];
@@ -51,6 +53,11 @@ export class ItemController {
       new ParseArrayPipe({ items: Number, separator: ',', optional: true }),
     )
     price: [number, number],
+    @Query(
+      'subcategory',
+      new ParseArrayPipe({ items: Number, separator: ',', optional: true }),
+    )
+    subcategory: number[],
     @Query(
       'condition',
       new ParseArrayPipe({ items: Number, separator: ',', optional: true }),
@@ -80,15 +87,8 @@ export class ItemController {
       }),
     )
     size: Size[],
-    @Query(
-      'category',
-      new ParseArrayPipe({
-        items: String,
-        separator: ',',
-        optional: true,
-      }),
-    )
-    category: string[],
+    @Query('category', new ParseIntPipe())
+    category: number,
     @Query('gender') gender: Gender,
     @Query('filterBy') filterBy: FilterBy,
     @Query('page') page: number,
@@ -101,6 +101,7 @@ export class ItemController {
       brand: brand || undefined,
       size: size || undefined,
       category: category || undefined,
+      subcategory: subcategory || undefined,
       gender: gender || undefined,
       filterBy: filterBy || undefined,
       page: page,

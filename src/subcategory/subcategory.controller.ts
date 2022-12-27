@@ -19,8 +19,8 @@ export class SubcategoryController {
   constructor(private readonly subcategoryService: SubcategoryService) {}
 
   @Get()
-  getAll(@Query() query: { gender: Gender; categoryId: number }) {
-    return this.subcategoryService.getAll(query.gender, query.categoryId);
+  getAll(@Query() query: { categoryId: number }) {
+    return this.subcategoryService.getAll(Number(query.categoryId));
   }
 
   @Post()

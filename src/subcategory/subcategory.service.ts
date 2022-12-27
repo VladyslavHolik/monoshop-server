@@ -9,12 +9,25 @@ export class SubcategoryService {
 
   async addSubcategory(dto: AddSubcategoryDto) {
     const candidate = await this.prisma.subcategory.findFirst({
-      where: { value: dto.value },
+      where: { value: dto.value, category: { id: dto.categoryId } },
     });
 
     if (candidate) {
       throw new HttpException(
         'Subcategory already exists',
+        HttpStatus.FORBIDDEN,
+      );
+    }
+
+    const isCategoryExists = await this.prisma.category.findFirst({
+      where: {
+        id: dto.categoryId,
+      },
+    });
+
+    if (!isCategoryExists) {
+      throw new HttpException(
+        'There is not category with this id',
         HttpStatus.FORBIDDEN,
       );
     }
@@ -27,12 +40,11 @@ export class SubcategoryService {
     });
   }
 
-  async getAll(gender: Gender, categoryId: number) {
+  async getAll(categoryId: number) {
     const subcategories = await this.prisma.subcategory.findMany({
       where: {
         category: {
           id: categoryId,
-          gender: gender,
         },
       },
       select: {
@@ -41,10 +53,12 @@ export class SubcategoryService {
       },
     });
 
-    const mapped = subcategories.map((category) => {
+    console.log(subcategories);
+
+    const mapped = subcategories.map((subcategory) => {
       return {
-        ...category,
-        label: category.value,
+        ...subcategory,
+        label: subcategory.value,
       };
     });
 

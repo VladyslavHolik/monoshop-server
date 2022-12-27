@@ -6,10 +6,6 @@ export class AddSubcategoryDto {
   @IsString()
   value: string;
 
-  @IsEnum(Gender)
-  @IsNotEmpty()
-  gender: string;
-
   @IsNotEmpty()
   @IsNumber()
   categoryId: number;

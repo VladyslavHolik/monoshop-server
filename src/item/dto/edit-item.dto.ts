@@ -46,6 +46,10 @@ export class EditItemDto {
   categoryId: number;
 
   @IsNotEmpty()
+  @IsNumber()
+  subcategoryId: number;
+
+  @IsNotEmpty()
   @IsString()
   brand: string;
 

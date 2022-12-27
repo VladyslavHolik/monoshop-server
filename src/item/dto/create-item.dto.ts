@@ -46,6 +46,10 @@ export class CreateItemDto {
   categoryId: number;
 
   @IsNotEmpty()
+  @IsNumber()
+  subcategoryId: number;
+
+  @IsNotEmpty()
   @IsString()
   brand: string;
 
@@ -61,7 +65,6 @@ export class CreateItemDto {
 
   @IsOptional()
   @IsString()
-  @MinLength(10)
   @MaxLength(200)
   description: string;
 

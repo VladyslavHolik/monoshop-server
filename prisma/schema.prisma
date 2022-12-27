@@ -56,6 +56,8 @@ model Item {
   size          Size 
   category      Category @relation(fields: [categoryId], references: [id])
   categoryId    Int
+  subcategory      Subcategory @relation(fields: [subcategoryId], references: [id])
+  subcategoryId    Int
   brand         Brand    @relation(fields: [brandId], references: [id])
   brandId       Int
   colour        Colour   @relation(fields: [colourId], references: [id])
@@ -84,8 +86,9 @@ model Category {
 model Subcategory {
   id Int @id @default(autoincrement())
   value String
-  category   Category @relation(fields: [categoryId], references: [id])
-  categoryId Int @unique
+    category   Category @relation(fields: [categoryId], references: [id])
+  categoryId Int
+  item Item[]
 }
 
 model Style {

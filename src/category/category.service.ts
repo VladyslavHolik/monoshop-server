@@ -20,8 +20,6 @@ export class CategoryService {
   }
 
   async getAll(gender: Gender) {
-    // console.log(gender);
-
     const categories = await this.prisma.category.findMany({
       where: {
         gender: gender,

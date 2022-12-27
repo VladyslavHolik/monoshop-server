@@ -24,6 +24,7 @@ export class ItemService {
         description: dto.description,
         brand: { connect: { value: dto.brand } },
         category: { connect: { id: dto.categoryId } },
+        subcategory: { connect: { id: dto.subcategoryId } },
         colour: { connect: { value: dto.colour } },
         images: dto.images,
         size: dto.size,
@@ -50,6 +51,7 @@ export class ItemService {
       colour,
       condition,
       filterBy,
+      subcategory,
       gender,
       price,
       size,
@@ -63,11 +65,14 @@ export class ItemService {
           gt: price[0],
           lt: price[1],
         },
+        category: {
+          id: category,
+        },
         AND: [
           {
-            category: {
-              value: {
-                in: category,
+            subcategory: {
+              id: {
+                in: subcategory,
               },
             },
           },
@@ -123,11 +128,14 @@ export class ItemService {
           gt: price[0],
           lt: price[1],
         },
+        category: {
+          id: category,
+        },
         AND: [
           {
-            category: {
-              value: {
-                in: category,
+            subcategory: {
+              id: {
+                in: subcategory,
               },
             },
           },
@@ -200,6 +208,7 @@ export class ItemService {
         description: true,
         name: true,
         hashtags: true,
+        subcategory: true,
       },
     });
   }
@@ -220,6 +229,7 @@ export class ItemService {
         gender: dto.gender,
         name: dto.name,
         hashtags: dto.hashtags,
+        subcategory: { connect: { id: dto.subcategoryId } },
       },
     });
     return editedItem;

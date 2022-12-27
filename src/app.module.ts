@@ -15,6 +15,7 @@ import { CategoryModule } from './category/category.module';
 import { BrandModule } from './brand/brand.module';
 import { ColourModule } from './colour/colour.module';
 import { FavoriteModule } from './favorite/favorite.module';
+import { SubcategoryModule } from './subcategory/subcategory.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { FavoriteModule } from './favorite/favorite.module';
     BrandModule,
     ColourModule,
     FavoriteModule,
+    SubcategoryModule,
   ],
   controllers: [AuthController, UserController, ItemController],
   providers: [AuthService, JwtService, ItemService],
