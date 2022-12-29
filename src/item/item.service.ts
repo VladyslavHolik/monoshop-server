@@ -1,9 +1,15 @@
-import { Injectable } from '@nestjs/common';
-import { User } from '@prisma/client';
+import {
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
+import { Prisma, User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateItemDto } from './dto/create-item.dto';
 import { EditItemDto } from './dto/edit-item.dto';
 import { IFilter } from './item.controller';
+import { SortBy } from './sort-by.enum';
 
 const getTotalPages = (totalItems: number, limit: number) => {
   return Math.ceil(totalItems / limit);
@@ -50,7 +56,7 @@ export class ItemService {
       category,
       colour,
       condition,
-      filterBy,
+      sortBy,
       subcategory,
       gender,
       price,
@@ -59,7 +65,21 @@ export class ItemService {
       page,
     } = query;
 
+    function sortPrice(): Prisma.SortOrder | undefined {
+      if (sortBy === SortBy.PriceHigh) {
+        return Prisma.SortOrder.desc;
+      }
+      if (sortBy === SortBy.PriceLow) {
+        return Prisma.SortOrder.asc;
+      }
+    }
+
     const items = await this.prisma.item.findMany({
+      orderBy: {
+        views: sortBy === SortBy.Popular ? 'desc' : undefined,
+        price: sortPrice(),
+        id: sortBy === SortBy.Recent ? 'desc' : undefined,
+      },
       where: {
         price: {
           gt: price[0],
@@ -187,11 +207,14 @@ export class ItemService {
       where: {
         userId: id,
       },
+      orderBy: {
+        id: 'desc',
+      },
     });
   }
 
   async getItem(id: string) {
-    return await this.prisma.item.findUnique({
+    const item = await this.prisma.item.findUnique({
       where: { id: Number(id) },
       select: {
         id: true,
@@ -209,8 +232,27 @@ export class ItemService {
         name: true,
         hashtags: true,
         subcategory: true,
+        views: true,
       },
     });
+
+    if (!item) {
+      throw new HttpException(
+        'There is no item with this id',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    await this.prisma.item.update({
+      where: { id: Number(id) },
+      data: {
+        views: {
+          increment: 1,
+        },
+      },
+    });
+
+    return item;
   }
 
   async editItem(id: string, dto: EditItemDto) {
@@ -235,7 +277,21 @@ export class ItemService {
     return editedItem;
   }
 
-  async delete(id: string) {
+  async delete(id: string, userId: number) {
+    const candidate = await this.prisma.item.findFirst({
+      where: {
+        id: Number(id),
+      },
+    });
+
+    if (!candidate) {
+      throw new BadRequestException('There is no item with this id');
+    }
+
+    if (candidate.userId !== userId) {
+      throw new HttpException('You do not have rights', HttpStatus.FORBIDDEN);
+    }
+
     await this.prisma.item.delete({ where: { id: Number(id) } });
 
     return { message: 'Item deleted succsfully' };

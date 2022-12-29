@@ -53,6 +53,7 @@ model Item {
   images        String[]
   price         Int
   description String?
+  views Int @default(1)
   size          Size 
   category      Category @relation(fields: [categoryId], references: [id])
   categoryId    Int

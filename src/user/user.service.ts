@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { AuthRequest } from 'src/auth/jwt.strategy';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -45,6 +45,8 @@ export class UserService {
             id: true,
             price: true,
             images: true,
+            name: true,
+            size: true,
           },
         },
         image: true,
@@ -52,6 +54,10 @@ export class UserService {
         location: true,
       },
     });
+
+    if (!user) {
+      throw new BadRequestException('There is not user with this id');
+    }
 
     return user;
   }

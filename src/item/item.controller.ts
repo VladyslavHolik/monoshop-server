@@ -18,8 +18,9 @@ import { JwtAuthGuard } from 'src/auth/auth.guard';
 import { AuthRequest } from 'src/auth/jwt.strategy';
 import { CreateItemDto } from './dto/create-item.dto';
 import { EditItemDto } from './dto/edit-item.dto';
-import { FilterBy } from './filter-by.enum';
+import { SortBy } from './sort-by.enum';
 import { ItemService } from './item.service';
+import { ParseEnumPipe } from '@nestjs/common/pipes';
 
 export interface IFilter {
   price?: [number, number];
@@ -31,7 +32,7 @@ export interface IFilter {
   brand?: string[];
   style?: string[];
   colour?: string[];
-  filterBy?: FilterBy;
+  sortBy?: SortBy;
   page: number;
 }
 
@@ -90,7 +91,7 @@ export class ItemController {
     @Query('category', new ParseIntPipe())
     category: number,
     @Query('gender') gender: Gender,
-    @Query('filterBy') filterBy: FilterBy,
+    @Query('sortBy', new ParseEnumPipe(SortBy)) sortBy: SortBy,
     @Query('page') page: number,
   ) {
     return this.itemService.getAll({
@@ -102,8 +103,8 @@ export class ItemController {
       size: size || undefined,
       category: category || undefined,
       subcategory: subcategory || undefined,
+      sortBy: sortBy || undefined,
       gender: gender || undefined,
-      filterBy: filterBy || undefined,
       page: page,
     });
   }
@@ -128,7 +129,8 @@ export class ItemController {
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
-  deleteItem(@Param('id') id: string) {
-    return this.itemService.delete(id);
+  deleteItem(@Param('id') id: string, @Req() req: AuthRequest) {
+    const userId = req.user.id;
+    return this.itemService.delete(id, userId);
   }
 }

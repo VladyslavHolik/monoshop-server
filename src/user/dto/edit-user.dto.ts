@@ -4,7 +4,7 @@ export class EditUserDto {
   @IsOptional()
   @IsString()
   @MinLength(9)
-  @MaxLength(9)
+  @MaxLength(12)
   phone: string;
 
   @IsOptional()
