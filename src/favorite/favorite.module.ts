@@ -8,5 +8,6 @@ import { JwtStrategy } from 'src/auth/jwt.strategy';
   controllers: [FavoriteController],
   providers: [FavoriteService, JwtStrategy],
   imports: [PrismaModule],
+  exports: [FavoriteService],
 })
 export class FavoriteModule {}

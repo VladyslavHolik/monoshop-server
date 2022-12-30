@@ -14,7 +14,7 @@ import {
 } from '@nestjs/common';
 import { Gender, Size, User } from '@prisma/client';
 
-import { JwtAuthGuard } from 'src/auth/auth.guard';
+import { JwtAuthGuard, OptionalJwtAuthGuard } from 'src/auth/auth.guard';
 import { AuthRequest } from 'src/auth/jwt.strategy';
 import { CreateItemDto } from './dto/create-item.dto';
 import { EditItemDto } from './dto/edit-item.dto';
@@ -48,6 +48,7 @@ export class ItemController {
   }
 
   @Get()
+  @UseGuards(OptionalJwtAuthGuard)
   getAll(
     @Query(
       'price',
@@ -93,20 +94,26 @@ export class ItemController {
     @Query('gender') gender: Gender,
     @Query('sortBy', new ParseEnumPipe(SortBy)) sortBy: SortBy,
     @Query('page') page: number,
+    @Req() req: AuthRequest,
   ) {
-    return this.itemService.getAll({
-      price: price || [undefined, undefined],
-      condition: condition || undefined,
-      colour: colour || undefined,
-      style: style || undefined,
-      brand: brand || undefined,
-      size: size || undefined,
-      category: category || undefined,
-      subcategory: subcategory || undefined,
-      sortBy: sortBy || undefined,
-      gender: gender || undefined,
-      page: page,
-    });
+    console.log(req.user);
+
+    return this.itemService.getAll(
+      {
+        price: price || [undefined, undefined],
+        condition: condition || undefined,
+        colour: colour || undefined,
+        style: style || undefined,
+        brand: brand || undefined,
+        size: size || undefined,
+        category: category || undefined,
+        subcategory: subcategory || undefined,
+        sortBy: sortBy || undefined,
+        gender: gender || undefined,
+        page: page,
+      },
+      req.user.id,
+    );
   }
 
   @Get('user')

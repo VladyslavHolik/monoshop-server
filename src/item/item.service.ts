@@ -10,6 +10,7 @@ import { CreateItemDto } from './dto/create-item.dto';
 import { EditItemDto } from './dto/edit-item.dto';
 import { IFilter } from './item.controller';
 import { SortBy } from './sort-by.enum';
+import { FavoriteService } from 'src/favorite/favorite.service';
 
 const getTotalPages = (totalItems: number, limit: number) => {
   return Math.ceil(totalItems / limit);
@@ -19,7 +20,10 @@ const ITEMS_LIMIT = 12;
 
 @Injectable()
 export class ItemService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private favoriteService: FavoriteService,
+  ) {}
 
   async createItem(dto: CreateItemDto, userId: number) {
     const item = await this.prisma.item.create({
@@ -50,7 +54,7 @@ export class ItemService {
     return item;
   }
 
-  async getAll(query: IFilter) {
+  async getAll(query: IFilter, userId: number) {
     const {
       brand,
       category,
@@ -193,6 +197,27 @@ export class ItemService {
         },
       },
     });
+
+    if (userId) {
+      const mapped = await Promise.all(
+        items.map(async (item) => {
+          return {
+            ...item,
+            isFavorite: await this.favoriteService.isAlreadyFavorite(
+              item.id,
+              userId,
+            ),
+          };
+        }),
+      );
+
+      return {
+        data: mapped,
+        meta: {
+          total: count,
+        },
+      };
+    }
 
     return {
       data: items,

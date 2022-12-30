@@ -8,16 +8,20 @@ export class FavoriteService {
   async toggleFavorite(id: number, userId: number) {
     const candidate = await this.prisma.item.findFirst({
       where: {
+        id,
         favoriteUsers: {
           some: {
             id: userId,
           },
         },
-        
       },
-      
+      select: {
+        favoriteUsers: true,
+      },
     });
-    
+
+    console.log(candidate, 'candidate');
+
     //Push item to the user
     if (!candidate) {
       const user = await this.prisma.user.update({
@@ -26,18 +30,18 @@ export class FavoriteService {
         },
         data: {
           favorites: {
-            set: {
-              id
-            }
+            connect: {
+              id,
+            },
           },
         },
         include: {
-          favorites: true
-        }
+          favorites: true,
+        },
       });
 
-      return user.favorites;
-    } 
+      return true;
+    }
 
     // Remove an item from the user
     const user = await this.prisma.user.update({
@@ -47,15 +51,47 @@ export class FavoriteService {
       data: {
         favorites: {
           disconnect: {
-            id
-          }
+            id,
+          },
         },
       },
       include: {
-        favorites: true
-      }
+        favorites: true,
+      },
+    });
+
+    return false;
+  }
+
+  async getAllFavorites(userId: number) {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        id: userId,
+      },
+      select: {
+        favorites: true,
+      },
     });
 
     return user.favorites;
+  }
+
+  async isAlreadyFavorite(id: number, userId: number) {
+    const candidate = await this.prisma.item.findFirst({
+      where: {
+        favoriteUsers: {
+          some: {
+            id: userId,
+          },
+        },
+        id,
+      },
+    });
+
+    if (candidate) {
+      return true;
+    }
+
+    return false;
   }
 }
