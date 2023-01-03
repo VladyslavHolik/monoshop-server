@@ -32,7 +32,9 @@ export class ItemService {
         condition: dto.condition,
         price: dto.price,
         description: dto.description,
-        brand: { connect: { value: dto.brand } },
+        brand: {
+          connect: dto.brand.map((id) => ({ id })),
+        },
         category: { connect: { id: dto.categoryId } },
         subcategory: { connect: { id: dto.subcategoryId } },
         colour: { connect: { value: dto.colour } },
@@ -67,6 +69,7 @@ export class ItemService {
       size,
       style,
       page,
+      search,
     } = query;
 
     function sortPrice(): Prisma.SortOrder | undefined {
@@ -85,6 +88,20 @@ export class ItemService {
         id: sortBy === SortBy.Recent ? 'desc' : undefined,
       },
       where: {
+        OR: [
+          {
+            name: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          },
+          {
+            description: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          },
+        ],
         price: {
           gt: price[0],
           lt: price[1],
@@ -92,6 +109,7 @@ export class ItemService {
         category: {
           id: category,
         },
+
         AND: [
           {
             subcategory: {
@@ -102,8 +120,10 @@ export class ItemService {
           },
           {
             brand: {
-              value: {
-                in: brand,
+              some: {
+                value: {
+                  in: brand,
+                },
               },
             },
           },
@@ -125,7 +145,6 @@ export class ItemService {
             },
           },
         ],
-
         gender: gender,
         colour: {
           value: {
@@ -165,8 +184,10 @@ export class ItemService {
           },
           {
             brand: {
-              value: {
-                in: brand,
+              every: {
+                value: {
+                  in: brand,
+                },
               },
             },
           },
@@ -277,7 +298,25 @@ export class ItemService {
       },
     });
 
-    return item;
+    const userItems = await this.prisma.item.findMany({
+      take: 5,
+
+      where: {
+        userId: {
+          equals: item.user.id,
+        },
+        NOT: [
+          {
+            id: item.id,
+          },
+        ],
+      },
+      orderBy: {
+        views: 'desc',
+      },
+    });
+
+    return { ...item, userItems };
   }
 
   async editItem(id: string, dto: EditItemDto) {
@@ -287,7 +326,9 @@ export class ItemService {
         condition: dto.condition,
         price: dto.price,
         description: dto.description,
-        brand: { connect: { value: dto.brand } },
+        brand: {
+          connect: dto.brand.map((id) => ({ id })),
+        },
         category: { connect: { id: dto.categoryId } },
         colour: { connect: { value: dto.colour } },
         images: dto.images,

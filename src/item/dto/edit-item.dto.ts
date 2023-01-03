@@ -11,6 +11,7 @@ import {
   IsOptional,
   MinLength,
   MaxLength,
+  isArray,
 } from 'class-validator';
 import { Colour, Gender, Size } from '@prisma/client';
 
@@ -50,8 +51,9 @@ export class EditItemDto {
   subcategoryId: number;
 
   @IsNotEmpty()
-  @IsString()
-  brand: string;
+  @ArrayMaxSize(5)
+  @ArrayMinSize(1)
+  brand: number[];
 
   @IsNotEmpty()
   @IsString()

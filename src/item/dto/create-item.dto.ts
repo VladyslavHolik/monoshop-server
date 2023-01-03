@@ -50,8 +50,9 @@ export class CreateItemDto {
   subcategoryId: number;
 
   @IsNotEmpty()
-  @IsString()
-  brand: string;
+  @ArrayMaxSize(5)
+  @ArrayMinSize(1)
+  brand: number[];
 
   @IsNotEmpty()
   @IsString()

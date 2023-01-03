@@ -3,6 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
+   previewFeatures = ["fullTextSearch"]
 }
 
 datasource db {
@@ -59,8 +60,7 @@ model Item {
   categoryId    Int
   subcategory      Subcategory @relation(fields: [subcategoryId], references: [id])
   subcategoryId    Int
-  brand         Brand    @relation(fields: [brandId], references: [id])
-  brandId       Int
+  brand         Brand[]    
   colour        Colour   @relation(fields: [colourId], references: [id])
   colourId      Int
   condition     Int

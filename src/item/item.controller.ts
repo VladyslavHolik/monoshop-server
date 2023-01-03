@@ -34,6 +34,7 @@ export interface IFilter {
   colour?: string[];
   sortBy?: SortBy;
   page: number;
+  search?: string;
 }
 
 @Controller('item')
@@ -92,6 +93,7 @@ export class ItemController {
     @Query('category', new ParseIntPipe())
     category: number,
     @Query('gender') gender: Gender,
+    @Query('search') search: string,
     @Query('sortBy', new ParseEnumPipe(SortBy)) sortBy: SortBy,
     @Query('page') page: number,
     @Req() req: AuthRequest,
@@ -111,6 +113,7 @@ export class ItemController {
         sortBy: sortBy || undefined,
         gender: gender || undefined,
         page: page,
+        search: search || '',
       },
       req.user.id,
     );

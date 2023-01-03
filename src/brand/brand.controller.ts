@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/auth.guard';
 import Role from 'src/auth/role.enum';
 import RoleGuard from 'src/auth/roles.guard';
@@ -16,7 +16,7 @@ export class BrandController {
   }
 
   @Get()
-  async getAll() {
-    return this.brandService.getAll();
+  async getAll(@Query('search') search: string) {
+    return this.brandService.getAll(search);
   }
 }

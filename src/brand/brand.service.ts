@@ -18,9 +18,16 @@ export class BrandService {
     return this.prisma.brand.create({ data: dto });
   }
 
-  async getAll() {
+  async getAll(search: string) {
     const brands = await this.prisma.brand.findMany({
-      select: { value: true },
+      select: { value: true, id: true },
+      where: {
+        value: {
+          contains: search ? search : undefined,
+          mode: 'insensitive',
+        },
+      },
+      take: 10,
     });
 
     const mapped = brands.map((item) => {
