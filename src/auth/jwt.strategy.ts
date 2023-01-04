@@ -11,13 +11,16 @@ dotenv.config();
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private prisma: PrismaService) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      ignoreExpiration: false,
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        (request: HttpRequest) => {
+          return request?.cookies?.Authentication;
+        },
+      ]),
       secretOrKey: process.env.JWT_SECRET,
     });
   }
 
-  async validateUser(payload: { id: string; email: string }) {
+  async validate(payload: { id: string; email: string }) {
     const user: User = await this.prisma.user.findUnique({
       where: { email: payload.email },
     });
@@ -29,7 +32,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 }
 
-interface UserJwtPayload {
+export interface UserJwtPayload {
   id: number;
 }
 

@@ -98,8 +98,6 @@ export class ItemController {
     @Query('page') page: number,
     @Req() req: AuthRequest,
   ) {
-    console.log(req.user);
-
     return this.itemService.getAll(
       {
         price: price || [undefined, undefined],

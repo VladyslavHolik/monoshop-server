@@ -16,6 +16,7 @@ import { BrandModule } from './brand/brand.module';
 import { ColourModule } from './colour/colour.module';
 import { FavoriteModule } from './favorite/favorite.module';
 import { SubcategoryModule } from './subcategory/subcategory.module';
+import { GoogleAuthModule } from './google-auth/google-auth.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { SubcategoryModule } from './subcategory/subcategory.module';
     ColourModule,
     FavoriteModule,
     SubcategoryModule,
+    GoogleAuthModule,
   ],
   controllers: [AuthController, UserController, ItemController],
   providers: [AuthService, JwtService, ItemService],

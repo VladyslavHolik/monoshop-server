@@ -10,6 +10,7 @@ import * as bcrypt from 'bcryptjs';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { LoginUserDto } from './dto/login-user.dto';
 import { Request, Response } from 'express';
+import { UserJwtPayload } from './jwt.strategy';
 
 @Injectable()
 export class AuthService {
@@ -35,15 +36,16 @@ export class AuthService {
       throw new BadRequestException('Wrong password or email');
     }
 
-    const token = await this.signToken(candidate.id, email);
+    const cookie = await this.getCookieWithJwtToken(candidate.id, email);
 
-    if (!token) {
-      throw new ForbiddenException();
-    }
+    res.setHeader('Set-Cookie', cookie);
 
-    return {
-      access_token: token,
-    };
+    return res.send(true);
+  }
+
+  async getCookieWithJwtToken(id: number, email: string) {
+    const token = await this.signToken(id, email);
+    return `Authentication=${token}; HttpOnly; Path=/; Max-Age=604800;`;
   }
 
   async register(userDto: CreateUserDto) {
