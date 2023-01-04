@@ -88,20 +88,32 @@ export class ItemService {
         id: sortBy === SortBy.Recent ? 'desc' : undefined,
       },
       where: {
-        OR: [
-          {
-            name: {
-              contains: search,
-              mode: 'insensitive',
-            },
-          },
-          {
-            description: {
-              contains: search,
-              mode: 'insensitive',
-            },
-          },
-        ],
+        OR: search
+          ? [
+              {
+                name: {
+                  contains: search,
+                  mode: 'insensitive',
+                },
+              },
+              {
+                description: {
+                  contains: search,
+                  mode: 'insensitive',
+                },
+              },
+              {
+                brand: {
+                  some: {
+                    value: {
+                      contains: search,
+                      mode: 'insensitive',
+                    },
+                  },
+                },
+              },
+            ]
+          : undefined,
         price: {
           gt: price[0],
           lt: price[1],
@@ -166,7 +178,38 @@ export class ItemService {
     });
 
     const count = await this.prisma.item.count({
+      orderBy: {
+        views: sortBy === SortBy.Popular ? 'desc' : undefined,
+        price: sortPrice(),
+        id: sortBy === SortBy.Recent ? 'desc' : undefined,
+      },
       where: {
+        OR: search
+          ? [
+              {
+                name: {
+                  contains: search,
+                  mode: 'insensitive',
+                },
+              },
+              {
+                description: {
+                  contains: search,
+                  mode: 'insensitive',
+                },
+              },
+              {
+                brand: {
+                  some: {
+                    value: {
+                      contains: search,
+                      mode: 'insensitive',
+                    },
+                  },
+                },
+              },
+            ]
+          : undefined,
         price: {
           gt: price[0],
           lt: price[1],
@@ -174,6 +217,7 @@ export class ItemService {
         category: {
           id: category,
         },
+
         AND: [
           {
             subcategory: {
@@ -184,7 +228,7 @@ export class ItemService {
           },
           {
             brand: {
-              every: {
+              some: {
                 value: {
                   in: brand,
                 },
@@ -209,7 +253,6 @@ export class ItemService {
             },
           },
         ],
-
         gender: gender,
         colour: {
           value: {
@@ -217,6 +260,8 @@ export class ItemService {
           },
         },
       },
+      take: ITEMS_LIMIT,
+      skip: (page - 1) * ITEMS_LIMIT,
     });
 
     if (userId) {
@@ -361,5 +406,16 @@ export class ItemService {
     await this.prisma.item.delete({ where: { id: Number(id) } });
 
     return { message: 'Item deleted succsfully' };
+  }
+
+  async getHot() {
+    const items = await this.prisma.item.findMany({
+      take: 10,
+      orderBy: {
+        views: 'desc',
+      },
+    });
+
+    return items;
   }
 }

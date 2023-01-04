@@ -5,10 +5,22 @@ import { PrismaModule } from 'src/prisma/prisma.module';
 import { UserModule } from 'src/user/user.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 @Module({
   controllers: [AuthController],
   providers: [AuthService],
-  imports: [PrismaModule, UserModule, JwtModule, PassportModule],
+  imports: [
+    PrismaModule,
+    UserModule,
+    JwtModule.register({
+      signOptions: {
+        expiresIn: '60s',
+      },
+      secretOrPrivateKey: process.env.JWT_SECRET,
+    }),
+    PassportModule,
+  ],
 })
 export class AuthModule {}

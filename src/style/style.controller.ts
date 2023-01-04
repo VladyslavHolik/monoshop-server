@@ -19,4 +19,9 @@ export class StyleController {
   getAll() {
     return this.styleService.getAll();
   }
+
+  @Get('popular')
+  getPopular() {
+    return this.styleService.getPopular();
+  }
 }

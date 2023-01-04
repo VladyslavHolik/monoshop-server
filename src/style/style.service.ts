@@ -32,4 +32,15 @@ export class StyleService {
 
     return mapped;
   }
+
+  async getPopular() {
+    return await this.prisma.style.findMany({
+      take: 5,
+      orderBy: {
+        item: {
+          _count: 'desc',
+        },
+      },
+    });
+  }
 }

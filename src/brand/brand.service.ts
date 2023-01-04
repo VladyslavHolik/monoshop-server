@@ -39,4 +39,17 @@ export class BrandService {
 
     return mapped;
   }
+
+  async getPopularBrands() {
+    const popularBrands = await this.prisma.brand.findMany({
+      orderBy: {
+        item: {
+          _count: 'desc',
+        },
+      },
+      take: 5,
+    });
+
+    return popularBrands;
+  }
 }

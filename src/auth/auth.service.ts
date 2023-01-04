@@ -41,9 +41,9 @@ export class AuthService {
       throw new ForbiddenException();
     }
 
-    res.cookie('token', token, {});
-
-    return res.send({ message: 'Logged in succesfully' });
+    return {
+      access_token: token,
+    };
   }
 
   async register(userDto: CreateUserDto) {

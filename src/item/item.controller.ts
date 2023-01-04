@@ -126,6 +126,11 @@ export class ItemController {
     return this.itemService.getUserItems(user.id);
   }
 
+  @Get('popular')
+  getHot() {
+    return this.itemService.getHot();
+  }
+
   @Get(':id')
   getItem(@Param('id') id: string) {
     return this.itemService.getItem(id);

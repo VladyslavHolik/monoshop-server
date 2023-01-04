@@ -11,12 +11,17 @@ export class BrandController {
 
   @Post()
   @UseGuards(JwtAuthGuard, RoleGuard(Role.Admin))
-  async addBrand(@Body() dto: AddBrandDto) {
+  addBrand(@Body() dto: AddBrandDto) {
     return this.brandService.addBrand(dto);
   }
 
   @Get()
-  async getAll(@Query('search') search: string) {
+  getAll(@Query('search') search: string) {
     return this.brandService.getAll(search);
+  }
+
+  @Get('popular')
+  getPopularBrands() {
+    return this.brandService.getPopularBrands();
   }
 }
