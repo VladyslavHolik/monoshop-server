@@ -13,5 +13,6 @@ dotenv.config();
   controllers: [AuthController],
   providers: [AuthService, JwtRefreshTokenStrategy],
   imports: [PrismaModule, UserModule, JwtModule, PassportModule],
+  exports: [AuthService],
 })
 export class AuthModule {}

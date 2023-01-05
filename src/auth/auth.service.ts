@@ -45,9 +45,15 @@ export class AuthService {
 
     await this.setCurrentRefreshToken(refreshTokenCookie.token, candidate.id);
 
-    res.setHeader('Set-Cookie', [accessTokenCookie, refreshTokenCookie.cookie]);
+    res.setHeader('Set-Cookie', [
+      accessTokenCookie.cookie,
+      refreshTokenCookie.cookie,
+    ]);
 
-    return res.send({ message: 'Logged in' });
+    return res.send({
+      accessToken: accessTokenCookie.token,
+      refreshTokenCookie: refreshTokenCookie.token,
+    });
   }
 
   getCookieWithJwtRefreshToken(id: number) {
@@ -72,11 +78,14 @@ export class AuthService {
     });
     const cookie = `Authentication=${token}; HttpOnly; Path=/; Max-Age=${process.env.JWT_ACCESS_TOKEN_EXPIRATION_TIME}`;
 
-    return cookie;
+    return {
+      cookie,
+      token,
+    };
   }
 
   async setCurrentRefreshToken(refreshToken: string, userId: number) {
-    const currentHashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+    const currentHashedRefreshToken = await this.hashPassword(refreshToken);
     await this.prisma.user.update({
       where: {
         id: userId,

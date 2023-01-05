@@ -31,7 +31,10 @@ export class UserService {
   }
 
   async getUserByEmail(email: string) {
-    const user = await this.prisma.user.findUnique({ where: { email } });
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
     return user;
   }
 
@@ -92,8 +95,22 @@ export class UserService {
       user.currentHashedRefreshToken,
     );
 
+    console.log(refreshToken, user.currentHashedRefreshToken);
+
     if (isRefreshTokenMatching) {
       return user;
     }
+  }
+
+  async createWithGoogle(email: string, fullName: string, image: string) {
+    const newUser = await this.prisma.user.create({
+      data: {
+        email,
+        fullName,
+        isRegisteredWithGoogle: true,
+        image,
+      },
+    });
+    return newUser;
   }
 }

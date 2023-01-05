@@ -115,8 +115,8 @@ export class ItemService {
             ]
           : undefined,
         price: {
-          gt: price[0],
-          lt: price[1],
+          gt: price[0] - 1,
+          lt: price[1] + 1,
         },
         category: {
           id: category,
@@ -260,8 +260,6 @@ export class ItemService {
           },
         },
       },
-      take: ITEMS_LIMIT,
-      skip: (page - 1) * ITEMS_LIMIT,
     });
 
     if (userId) {

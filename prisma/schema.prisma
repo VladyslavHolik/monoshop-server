@@ -15,7 +15,7 @@ model User {
   id        Int     @id @default(autoincrement())
   email     String  @unique
   fullName  String
-  password  String
+  password  String?
   items     Item[]  @relation("items")
   location  String?
   phone     String?
@@ -23,6 +23,7 @@ model User {
   role      Role    @default(USER)
   favorites Item[]  @relation("favorites")
   currentHashedRefreshToken String?
+  isRegisteredWithGoogle Boolean @default(false)
 }
 
 enum Role {

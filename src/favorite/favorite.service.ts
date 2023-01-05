@@ -20,8 +20,6 @@ export class FavoriteService {
       },
     });
 
-    console.log(candidate, 'candidate');
-
     //Push item to the user
     if (!candidate) {
       const user = await this.prisma.user.update({

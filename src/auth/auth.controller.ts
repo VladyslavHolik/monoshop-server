@@ -45,7 +45,7 @@ export class AuthController {
     const accessTokenCookie = this.authService.getCookieWithJwtAccessToken(
       request.user.id,
     );
-    request.res.setHeader('Set-Cookie', accessTokenCookie);
+    request.res.setHeader('Set-Cookie', accessTokenCookie.cookie);
     return request.user;
   }
 }

@@ -11,12 +11,8 @@ dotenv.config();
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private prisma: PrismaService) {
     super({
-      jwtFromRequest: ExtractJwt.fromExtractors([
-        (request: HttpRequest) => {
-          return request?.cookies?.Authentication;
-        },
-      ]),
-      secretOrKey: process.env.JWT_SECRET,
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      secretOrKey: process.env.JWT_ACCESS_TOKEN_SECRET,
     });
   }
 
