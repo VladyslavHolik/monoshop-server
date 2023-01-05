@@ -1,16 +1,20 @@
 import {
   BadRequestException,
   ForbiddenException,
+  Get,
   Injectable,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { UserService } from 'src/user/user.service';
-import * as bcrypt from 'bcryptjs';
+import * as bcrypt from 'bcrypt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { LoginUserDto } from './dto/login-user.dto';
 import { Request, Response } from 'express';
-import { UserJwtPayload } from './jwt.strategy';
+import { AuthRequest, UserJwtPayload } from './jwt.strategy';
+import JwtRefreshGuard from './jwt-refresh.guard';
 
 @Injectable()
 export class AuthService {
@@ -36,16 +40,51 @@ export class AuthService {
       throw new BadRequestException('Wrong password or email');
     }
 
-    const cookie = await this.getCookieWithJwtToken(candidate.id, email);
+    const accessTokenCookie = this.getCookieWithJwtAccessToken(candidate.id);
+    const refreshTokenCookie = this.getCookieWithJwtRefreshToken(candidate.id);
 
-    res.setHeader('Set-Cookie', cookie);
+    await this.setCurrentRefreshToken(refreshTokenCookie.token, candidate.id);
 
-    return res.send(true);
+    res.setHeader('Set-Cookie', [accessTokenCookie, refreshTokenCookie.cookie]);
+
+    return res.send({ message: 'Logged in' });
   }
 
-  async getCookieWithJwtToken(id: number, email: string) {
-    const token = await this.signToken(id, email);
-    return `Authentication=${token}; HttpOnly; Path=/; Max-Age=604800;`;
+  getCookieWithJwtRefreshToken(id: number) {
+    const payload = { id };
+    const token = this.jwt.sign(payload, {
+      secret: process.env.JWT_REFRESH_TOKEN_SECRET,
+      expiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRATION_TIME,
+    });
+    const cookie = `Refresh=${token}; HttpOnly; Path=/; Max-Age=${process.env.JWT_REFRESH_TOKEN_EXPIRATION_TIME}`;
+
+    return {
+      cookie,
+      token,
+    };
+  }
+
+  getCookieWithJwtAccessToken(id: number) {
+    const payload = { id };
+    const token = this.jwt.sign(payload, {
+      secret: process.env.JWT_ACCESS_TOKEN_SECRET,
+      expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRATION_TIME,
+    });
+    const cookie = `Authentication=${token}; HttpOnly; Path=/; Max-Age=${process.env.JWT_ACCESS_TOKEN_EXPIRATION_TIME}`;
+
+    return cookie;
+  }
+
+  async setCurrentRefreshToken(refreshToken: string, userId: number) {
+    const currentHashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+    await this.prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        currentHashedRefreshToken,
+      },
+    });
   }
 
   async register(userDto: CreateUserDto) {
@@ -66,7 +105,7 @@ export class AuthService {
   }
 
   async signout(req: Request, res: Response) {
-    res.clearCookie('token');
+    res.clearCookie('Authorization');
     return res.send({ message: 'Succesfuly signed out' });
   }
 
@@ -78,13 +117,5 @@ export class AuthService {
 
   async comparePasswords(password: string, hash: string): Promise<boolean> {
     return await bcrypt.compare(password, hash);
-  }
-
-  async signToken(id: number, email: string) {
-    const payload = { id, email };
-
-    return this.jwt.signAsync(payload, {
-      secret: process.env.JWT_SECRET,
-    });
   }
 }

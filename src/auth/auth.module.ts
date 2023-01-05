@@ -6,21 +6,12 @@ import { UserModule } from 'src/user/user.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import * as dotenv from 'dotenv';
+import { JwtRefreshTokenStrategy } from './jwt-refresh-token.strategy';
 dotenv.config();
 
 @Module({
   controllers: [AuthController],
-  providers: [AuthService],
-  imports: [
-    PrismaModule,
-    UserModule,
-    JwtModule.register({
-      signOptions: {
-        expiresIn: 3600,
-      },
-      secretOrPrivateKey: process.env.JWT_SECRET,
-    }),
-    PassportModule,
-  ],
+  providers: [AuthService, JwtRefreshTokenStrategy],
+  imports: [PrismaModule, UserModule, JwtModule, PassportModule],
 })
 export class AuthModule {}

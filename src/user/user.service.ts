@@ -4,6 +4,7 @@ import { AuthRequest } from 'src/auth/jwt.strategy';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { EditUserDto } from './dto/edit-user.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -63,7 +64,7 @@ export class UserService {
   }
 
   async getProfile(id: number) {
-    return this.prisma.user.findUnique({
+    return await this.prisma.user.findUnique({
       where: {
         id,
       },
@@ -77,5 +78,22 @@ export class UserService {
         ...dto,
       },
     });
+  }
+
+  async getUserIfRefreshTokenMatches(refreshToken: string, userId: number) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    const isRefreshTokenMatching = await bcrypt.compare(
+      refreshToken,
+      user.currentHashedRefreshToken,
+    );
+
+    if (isRefreshTokenMatching) {
+      return user;
+    }
   }
 }
