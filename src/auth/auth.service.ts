@@ -37,51 +37,38 @@ export class AuthService {
     const isMatch = await this.comparePasswords(password, candidate.password);
 
     if (!isMatch) {
-      throw new BadRequestException('Wrong password or email');
+      throw new BadRequestException('Wrong credentials');
     }
 
-    const accessTokenCookie = this.getCookieWithJwtAccessToken(candidate.id);
-    const refreshTokenCookie = this.getCookieWithJwtRefreshToken(candidate.id);
+    const accessToken = this.getAccessToken(candidate.id);
+    const refreshToken = this.getRefreshToken(candidate.id);
 
-    await this.setCurrentRefreshToken(refreshTokenCookie.token, candidate.id);
-
-    res.setHeader('Set-Cookie', [
-      accessTokenCookie.cookie,
-      refreshTokenCookie.cookie,
-    ]);
+    await this.setCurrentRefreshToken(refreshToken, candidate.id);
 
     return res.send({
-      accessToken: accessTokenCookie.token,
-      refreshTokenCookie: refreshTokenCookie.token,
+      accessToken: accessToken,
+      refreshToken: refreshToken,
     });
   }
 
-  getCookieWithJwtRefreshToken(id: number) {
+  getRefreshToken(id: number) {
     const payload = { id };
     const token = this.jwt.sign(payload, {
       secret: process.env.JWT_REFRESH_TOKEN_SECRET,
       expiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRATION_TIME,
     });
-    const cookie = `Refresh=${token}; HttpOnly; Path=/; Max-Age=${process.env.JWT_REFRESH_TOKEN_EXPIRATION_TIME}`;
 
-    return {
-      cookie,
-      token,
-    };
+    return token;
   }
 
-  getCookieWithJwtAccessToken(id: number) {
+  getAccessToken(id: number) {
     const payload = { id };
     const token = this.jwt.sign(payload, {
       secret: process.env.JWT_ACCESS_TOKEN_SECRET,
       expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRATION_TIME,
     });
-    const cookie = `Authentication=${token}; HttpOnly; Path=/; Max-Age=${process.env.JWT_ACCESS_TOKEN_EXPIRATION_TIME}`;
 
-    return {
-      cookie,
-      token,
-    };
+    return token;
   }
 
   async setCurrentRefreshToken(refreshToken: string, userId: number) {
@@ -114,7 +101,6 @@ export class AuthService {
   }
 
   async signout(req: Request, res: Response) {
-    res.clearCookie('Authorization');
     return res.send({ message: 'Succesfuly signed out' });
   }
 

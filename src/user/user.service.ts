@@ -95,7 +95,7 @@ export class UserService {
       user.currentHashedRefreshToken,
     );
 
-    console.log(refreshToken, user.currentHashedRefreshToken);
+    console.log(isRefreshTokenMatching);
 
     if (isRefreshTokenMatching) {
       return user;

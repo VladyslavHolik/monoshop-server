@@ -21,12 +21,9 @@ export class GoogleAuthenticationController {
     @Body() tokenData: TokenVerificationDto,
     @Req() request: Request,
   ) {
-    const { accessTokenCookie, refreshTokenCookie, user } =
+    const { accessToken, refreshToken, user } =
       await this.googleAuthenticationService.authenticate(tokenData.token);
-    request.res.setHeader('Set-Cookie', [
-      accessTokenCookie.cookie,
-      refreshTokenCookie,
-    ]);
-    return user;
+
+    return { accessToken, refreshToken };
   }
 }

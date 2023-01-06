@@ -40,11 +40,9 @@ export class GoogleAuthenticationService {
     const user = await this.usersService.getUserByEmail(email);
 
     if (user) {
-      console.log('logged in');
       return this.handleRegisteredUser(user);
     }
 
-    console.log('registered');
     return this.registerUser(tokenInfo);
   }
 
@@ -59,15 +57,14 @@ export class GoogleAuthenticationService {
   }
 
   async getCookiesForUser(user: User) {
-    const accessTokenCookie = this.authService.getCookieWithJwtAccessToken(
-      user.id,
-    );
-    const { cookie: refreshTokenCookie, token: refreshToken } =
-      this.authService.getCookieWithJwtRefreshToken(user.id);
+    const accessToken = this.authService.getAccessToken(user.id);
+
+    const refreshToken = this.authService.getRefreshToken(user.id);
+
     await this.authService.setCurrentRefreshToken(refreshToken, user.id);
     return {
-      accessTokenCookie,
-      refreshTokenCookie,
+      accessToken,
+      refreshToken,
     };
   }
 
@@ -75,11 +72,10 @@ export class GoogleAuthenticationService {
     if (!user.isRegisteredWithGoogle) {
       throw new UnauthorizedException();
     }
-    const { accessTokenCookie, refreshTokenCookie } =
-      await this.getCookiesForUser(user);
+    const { accessToken, refreshToken } = await this.getCookiesForUser(user);
     return {
-      accessTokenCookie,
-      refreshTokenCookie,
+      accessToken,
+      refreshToken,
       user,
     };
   }
