@@ -17,6 +17,7 @@ import { ColourModule } from './colour/colour.module';
 import { FavoriteModule } from './favorite/favorite.module';
 import { SubcategoryModule } from './subcategory/subcategory.module';
 import { GoogleAuthModule } from './google-auth/google-auth.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { GoogleAuthModule } from './google-auth/google-auth.module';
     FavoriteModule,
     SubcategoryModule,
     GoogleAuthModule,
+    ChatModule,
   ],
   controllers: [AuthController, UserController, ItemController],
   providers: [AuthService, JwtService, ItemService],

@@ -113,4 +113,36 @@ export class AuthService {
   async comparePasswords(password: string, hash: string): Promise<boolean> {
     return await bcrypt.compare(password, hash);
   }
+
+  async verifyAndReturnUser(token: string) {
+    const jwtToken = token;
+
+    if (token) {
+      const payload = this.jwt.verify(jwtToken, {
+        secret: process.env.JWT_ACCESS_TOKEN_SECRET,
+      });
+
+      if (payload) {
+        const user = this.prisma.user.findUnique({
+          where: {
+            id: payload.id,
+          },
+        });
+
+        return user;
+      }
+    }
+  }
+
+  async refresh(userId: number) {
+    const accessToken = this.getAccessToken(userId);
+    const refreshToken = this.getRefreshToken(userId);
+
+    await this.setCurrentRefreshToken(refreshToken, userId);
+
+    return {
+      accessToken: accessToken,
+      refreshToken: refreshToken,
+    };
+  }
 }
