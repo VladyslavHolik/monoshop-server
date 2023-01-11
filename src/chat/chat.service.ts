@@ -11,7 +11,7 @@ export class ChatService {
     message: string,
     userId: number,
     forwardedId: number,
-    hasSeen?: true,
+    hasSeen: boolean,
   ) {
     const room = await this.getRoom(forwardedId, userId);
 
@@ -33,35 +33,33 @@ export class ChatService {
       },
     });
 
-    if (!forwarded) {
-      throw new BadRequestException('No user with forwarded id');
-    }
-
-    const room = await this.prisma.room.findFirst({
-      where: {
-        users: {
-          every: {
-            id: {
-              in: [userId, forwardedId],
-            },
-          },
-        },
-      },
-    });
-
-    if (!room) {
-      const room = await this.prisma.room.create({
-        data: {
+    if (forwarded.id && userId) {
+      const room = await this.prisma.room.findFirst({
+        where: {
           users: {
-            connect: [{ id: userId }, { id: forwardedId }],
+            every: {
+              id: {
+                in: [forwarded.id, userId],
+              },
+            },
           },
         },
       });
 
+      if (!room) {
+        const room = await this.prisma.room.create({
+          data: {
+            users: {
+              connect: [{ id: userId }, { id: forwardedId }],
+            },
+          },
+        });
+
+        return room;
+      }
+
       return room;
     }
-
-    return room;
   }
 
   async getMessages() {
@@ -69,9 +67,11 @@ export class ChatService {
   }
 
   async getCurrentRoom(forwardedId: number, userId: number) {
-    const room = await this.getRoom(forwardedId, userId);
+    if (forwardedId) {
+      const room = await this.getRoom(forwardedId, userId);
 
-    return room.id;
+      return room.id;
+    }
   }
 
   async markSeen(roomId: number, userId: number) {
@@ -102,10 +102,71 @@ export class ChatService {
   }
 
   async getRoomMessages(roomId: number) {
-    return await this.prisma.message.findMany({
+    const messages = await this.prisma.message.findMany({
       where: {
         roomId,
       },
+      orderBy: {
+        id: 'asc',
+      },
+    });
+
+    return messages;
+  }
+
+  async getUserChats(userId: number) {
+    const rooms = await this.prisma.room.findMany({
+      where: {
+        users: {
+          some: {
+            id: userId,
+          },
+        },
+        NOT: [
+          {
+            message: {
+              every: {
+                roomId: {
+                  lt: 1,
+                },
+              },
+            },
+          },
+        ],
+      },
+      select: {
+        users: {
+          select: {
+            fullName: true,
+            id: true,
+            image: true,
+          },
+          where: {
+            id: {
+              not: userId,
+            },
+          },
+        },
+        message: {
+          take: 1,
+          select: {
+            markedSeen: true,
+            id: true,
+          },
+          orderBy: {
+            id: 'desc',
+          },
+        },
+      },
+    });
+
+    return rooms.map((room) => {
+      return {
+        ...room,
+        users: {
+          ...room.users[0],
+        },
+      };
     });
   }
 }

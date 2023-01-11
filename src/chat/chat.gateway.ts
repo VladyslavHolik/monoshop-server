@@ -15,6 +15,7 @@ import { JwtAuthGuard } from 'src/auth/auth.guard';
 import { AuthRequest } from 'src/auth/jwt.strategy';
 import { Message } from '@prisma/client';
 import { AuthService } from 'src/auth/auth.service';
+import { UserService } from 'src/user/user.service';
 
 const users: Record<string, string> = {};
 
@@ -30,7 +31,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(
     private readonly chatService: ChatService,
     private readonly authService: AuthService,
-  ) {}
+    private readonly userService: UserService,
+  ) {
+    this.clientSize = 0;
+  }
 
   @WebSocketServer() server: Server;
 
@@ -40,72 +44,117 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() socket: Socket,
   ) {
     const user = await this.authService.verifyAndReturnUser(
-      socket.handshake.headers.authorization as string,
+      socket.handshake.auth.token as string,
     );
 
-    const forwardedId = Number(socket.handshake.query.forwarded);
+    const forwardedId = socket.data.forwardedId;
+    const currentRoom = socket.data.room;
 
-    // Mark create message as seen
-    if (this.clientSize === 2) {
-      const message = await this.chatService.createMessage(
-        body.text,
-        user.id,
-        forwardedId,
-        true,
-      );
-
-      return this.server.to(String(message.roomId)).emit('onMessage', {
-        ...message,
-        room: message.roomId,
-        clientSize: this.clientSize,
-      });
-    }
+    const hasSeen = this.clientSize === 2 ? true : false;
 
     const message = await this.chatService.createMessage(
       body.text,
       user.id,
       forwardedId,
+      hasSeen,
     );
 
-    this.server.to(String(message.roomId)).emit('onMessage', {
+    this.server.in(String(currentRoom)).emit('onMessage', {
       ...message,
-      room: message.roomId,
+      room: currentRoom,
       clientSize: this.clientSize,
     });
+
+    console.log(socket.rooms);
+
+    if (hasSeen) {
+      await this.chatService.markSeenAll(currentRoom);
+
+      const roomMessages = await this.chatService.getRoomMessages(currentRoom);
+
+      socket.emit('getRoomMessages', roomMessages);
+    }
   }
 
-  @SubscribeMessage('onMessage')
   async handleConnection(socket: Socket) {
-    const token = socket.handshake.headers.authorization as string;
-    const user = await this.authService.verifyAndReturnUser(token);
-    if (!user) {
-      socket.disconnect();
-      console.log('disconnected');
-    }
-    const forwardedId = socket.handshake.query.forwarded;
-    const getCurrentRoom = await this.chatService.getCurrentRoom(
-      Number(forwardedId),
-      user.id,
-    );
-    const roomMessages = await this.chatService.getRoomMessages(getCurrentRoom);
+    this.server.once('connection', async (socket) => {
+      const token = socket.handshake.auth.token;
 
-    await this.chatService.markSeen(getCurrentRoom, user.id);
+      if (!token) {
+        socket.disconnect();
+        return;
+      }
 
-    this.server.on('connection', async (socket) => {
-      socket.join(String(getCurrentRoom));
+      const user = await this.authService.verifyAndReturnUser(token);
 
-      const clientSize = this.server.sockets.adapter.rooms.get(
-        String(getCurrentRoom),
-      ).size;
+      if (!user || Object.keys(user).length === 0) {
+        socket.disconnect();
+        return;
+      }
 
-      this.clientSize = clientSize;
+      const userChats = await this.chatService.getUserChats(user.id);
 
-      // socket.emit('onMessage', roomMessages);
+      socket.emit('getChats', userChats);
 
-      socket.on('sendMessage', async () => {});
+      socket.on('joinRoom', async (forwardedId) => {
+        socket.data.forwardedId = Number(forwardedId);
+        socket.data.userId = user.id;
+
+        if (forwardedId == user.id) {
+          socket.disconnect();
+          return;
+        }
+
+        if (!forwardedId) {
+          socket.disconnect();
+          return;
+        }
+
+        const getUser = await this.userService.getUserById(Number(forwardedId));
+
+        if (!getUser) {
+          socket.disconnect();
+        }
+
+        socket.emit('getUser', getUser);
+
+        const getCurrentRoom = await this.chatService.getCurrentRoom(
+          socket.data.forwardedId,
+          user.id,
+        );
+
+        socket.data.room = getCurrentRoom;
+
+        socket.rooms.forEach(async (room) => {
+          if (room) {
+            await socket.leave(room);
+          }
+        });
+
+        await socket.join(String(getCurrentRoom));
+
+        if (!getCurrentRoom) {
+          socket.disconnect();
+        }
+
+        // Set message to seen when second user connected to socket
+        await this.chatService.markSeen(getCurrentRoom, user.id);
+
+        const roomMessages = await this.chatService.getRoomMessages(
+          getCurrentRoom,
+        );
+
+        this.clientSize = (
+          await this.server.of('/').in(String(getCurrentRoom)).allSockets()
+        ).size;
+
+        socket.emit('getRoomMessages', roomMessages);
+      });
     });
   }
+
   handleDisconnect(client: any) {
+    console.log('disconesso');
     this.clientSize--;
   }
 }

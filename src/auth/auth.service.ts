@@ -117,10 +117,18 @@ export class AuthService {
   async verifyAndReturnUser(token: string) {
     const jwtToken = token;
 
+    if (!jwtToken) {
+      throw new BadRequestException('No token provided');
+    }
+
     if (token) {
       const payload = this.jwt.verify(jwtToken, {
         secret: process.env.JWT_ACCESS_TOKEN_SECRET,
       });
+
+      if (!payload) {
+        throw new BadRequestException('Token expired');
+      }
 
       if (payload) {
         const user = this.prisma.user.findUnique({
@@ -128,6 +136,10 @@ export class AuthService {
             id: payload.id,
           },
         });
+
+        if (!user) {
+          throw new BadRequestException('No user');
+        }
 
         return user;
       }

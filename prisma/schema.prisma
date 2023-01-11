@@ -126,4 +126,5 @@ model Message {
   userId Int
   delivered Boolean @default(false)
   markedSeen Boolean @default(false)
+  date DateTime @default(now())
 }

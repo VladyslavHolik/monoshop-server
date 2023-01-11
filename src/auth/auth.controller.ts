@@ -7,6 +7,7 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { JwtAuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
@@ -29,14 +30,14 @@ export class AuthController {
   }
 
   @Get('signout')
-  signout(@Req() req, @Res() res) {
+  signout(@Req() req: AuthRequest, @Res() res: Response) {
     return this.authService.signout(req, res);
   }
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
-  getMe() {
-    return true;
+  getMe(@Req() req: AuthRequest) {
+    return req.user.id;
   }
 
   @UseGuards(JwtRefreshGuard)
