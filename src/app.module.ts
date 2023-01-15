@@ -18,6 +18,9 @@ import { FavoriteModule } from './favorite/favorite.module';
 import { SubcategoryModule } from './subcategory/subcategory.module';
 import { GoogleAuthModule } from './google-auth/google-auth.module';
 import { ChatModule } from './chat/chat.module';
+import { StripeModule } from './stripe/stripe.module';
+import { WebhookModule } from './webhook/webhook.module';
+import { OrderModule } from './order/order.module';
 
 @Module({
   imports: [
@@ -34,6 +37,9 @@ import { ChatModule } from './chat/chat.module';
     SubcategoryModule,
     GoogleAuthModule,
     ChatModule,
+    StripeModule,
+    WebhookModule,
+    OrderModule,
   ],
   controllers: [AuthController, UserController, ItemController],
   providers: [AuthService, JwtService, ItemService],

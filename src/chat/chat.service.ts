@@ -7,12 +7,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class ChatService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createMessage(
-    message: string,
-    userId: number,
-    forwardedId: number,
-    hasSeen: boolean,
-  ) {
+  async createMessage(message: string, userId: number, forwardedId: number) {
     const room = await this.getRoom(forwardedId, userId);
 
     return await this.prisma.message.create({
@@ -21,7 +16,6 @@ export class ChatService {
         userId: userId,
         roomId: room.id,
         delivered: true,
-        markedSeen: hasSeen,
       },
     });
   }
@@ -74,6 +68,14 @@ export class ChatService {
     }
   }
 
+  async getRoomItem(roomId: number) {
+    return await this.prisma.item.findFirst({
+      where: {
+        roomId,
+      },
+    });
+  }
+
   async markSeen(roomId: number, userId: number) {
     return await this.prisma.message.updateMany({
       data: {
@@ -101,6 +103,42 @@ export class ChatService {
     });
   }
 
+  async setItemToRoom(roomId: number, forwardedId: number, itemId: number) {
+    const room = await this.prisma.room.findFirst({
+      where: {
+        id: roomId,
+        users: {
+          some: {
+            id: forwardedId,
+          },
+        },
+      },
+    });
+
+    const item = await this.prisma.item.findFirst({
+      where: {
+        id: itemId,
+      },
+    });
+
+    if (room && item) {
+      return await this.prisma.room.update({
+        where: {
+          id: roomId,
+        },
+        data: {
+          item: {
+            connect: { id: itemId },
+          },
+        },
+        select: {
+          item: true,
+          id: true,
+        },
+      });
+    }
+  }
+
   async getRoomMessages(roomId: number) {
     const messages = await this.prisma.message.findMany({
       where: {
@@ -122,6 +160,7 @@ export class ChatService {
             id: userId,
           },
         },
+
         NOT: [
           {
             message: {
@@ -135,11 +174,13 @@ export class ChatService {
         ],
       },
       select: {
+        id: true,
         users: {
           select: {
             fullName: true,
             id: true,
             image: true,
+            lastActivity: true,
           },
           where: {
             id: {
@@ -147,11 +188,19 @@ export class ChatService {
             },
           },
         },
+        item: true,
         message: {
           take: 1,
           select: {
             markedSeen: true,
             id: true,
+            date: true,
+            userId: true,
+          },
+          where: {
+            userId: {
+              not: userId,
+            },
           },
           orderBy: {
             id: 'desc',
@@ -163,6 +212,9 @@ export class ChatService {
     return rooms.map((room) => {
       return {
         ...room,
+        message: {
+          ...room.message[0],
+        },
         users: {
           ...room.users[0],
         },

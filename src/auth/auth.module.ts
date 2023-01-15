@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { PrismaModule } from 'src/prisma/prisma.module';
@@ -12,7 +12,12 @@ dotenv.config();
 @Module({
   controllers: [AuthController],
   providers: [AuthService, JwtRefreshTokenStrategy],
-  imports: [PrismaModule, UserModule, JwtModule, PassportModule],
+  imports: [
+    PrismaModule,
+    forwardRef(() => UserModule),
+    JwtModule,
+    PassportModule,
+  ],
   exports: [AuthService],
 })
 export class AuthModule {}

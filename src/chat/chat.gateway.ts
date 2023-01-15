@@ -26,15 +26,11 @@ const users: Record<string, string> = {};
   serveClient: false,
 })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
-  clientSize: number;
-
   constructor(
     private readonly chatService: ChatService,
     private readonly authService: AuthService,
     private readonly userService: UserService,
-  ) {
-    this.clientSize = 0;
-  }
+  ) {}
 
   @WebSocketServer() server: Server;
 
@@ -43,37 +39,20 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() body: { text: string },
     @ConnectedSocket() socket: Socket,
   ) {
-    const user = await this.authService.verifyAndReturnUser(
-      socket.handshake.auth.token as string,
-    );
-
     const forwardedId = socket.data.forwardedId;
     const currentRoom = socket.data.room;
-
-    const hasSeen = this.clientSize === 2 ? true : false;
+    const userId = socket.data.userId;
 
     const message = await this.chatService.createMessage(
       body.text,
-      user.id,
+      userId,
       forwardedId,
-      hasSeen,
     );
 
     this.server.in(String(currentRoom)).emit('onMessage', {
       ...message,
       room: currentRoom,
-      clientSize: this.clientSize,
     });
-
-    console.log(socket.rooms);
-
-    if (hasSeen) {
-      await this.chatService.markSeenAll(currentRoom);
-
-      const roomMessages = await this.chatService.getRoomMessages(currentRoom);
-
-      socket.emit('getRoomMessages', roomMessages);
-    }
   }
 
   async handleConnection(socket: Socket) {
@@ -87,44 +66,63 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       const user = await this.authService.verifyAndReturnUser(token);
 
-      if (!user || Object.keys(user).length === 0) {
+      if (!user) {
+        console.log('USER IS NOT VALID');
         socket.disconnect();
         return;
       }
+
+      socket.data.userId = user.id;
 
       const userChats = await this.chatService.getUserChats(user.id);
 
       socket.emit('getChats', userChats);
 
-      socket.on('joinRoom', async (forwardedId) => {
-        socket.data.forwardedId = Number(forwardedId);
-        socket.data.userId = user.id;
+      socket.on('joinRoom', async (data: { user: string; item?: string }) => {
+        const forwardedId = Number(data.user);
+        const forwardedItemId = Number(data.item);
+
+        const isForwardedNaN = Number.isNaN(forwardedId);
+        const isItemNan = Number.isNaN(forwardedItemId);
 
         if (forwardedId == user.id) {
+          console.log('disconnect ID IS THE SAME');
           socket.disconnect();
           return;
         }
 
-        if (!forwardedId) {
+        if (!forwardedId || isForwardedNaN) {
+          console.log(forwardedId);
           socket.disconnect();
           return;
         }
 
-        const getUser = await this.userService.getUserById(Number(forwardedId));
+        socket.data.forwardedId = forwardedId;
+
+        // Get forwarded info info
+        const getUser = await this.userService.getProfile(forwardedId);
+        // Get a time info
 
         if (!getUser) {
           socket.disconnect();
+          return;
         }
-
-        socket.emit('getUser', getUser);
 
         const getCurrentRoom = await this.chatService.getCurrentRoom(
           socket.data.forwardedId,
           user.id,
         );
 
+        if (getCurrentRoom) {
+          if (!getUser) {
+            socket.disconnect();
+            return;
+          }
+        }
+
         socket.data.room = getCurrentRoom;
 
+        // Disconnect from all previous rooms
         socket.rooms.forEach(async (room) => {
           if (room) {
             await socket.leave(room);
@@ -133,8 +131,27 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
         await socket.join(String(getCurrentRoom));
 
-        if (!getCurrentRoom) {
-          socket.disconnect();
+        // Set item to room
+        if (data.item) {
+          if (isItemNan) {
+            socket.disconnect();
+            return;
+          }
+          const room = await this.chatService.setItemToRoom(
+            getCurrentRoom,
+            forwardedId,
+            forwardedItemId,
+          );
+          // If there is no room updated disconnect
+          if (!room) {
+            socket.disconnect();
+            return;
+          }
+          socket.emit('getItem', room.item);
+        } else {
+          // Just send and item
+          const roomItem = await this.chatService.getRoomItem(getCurrentRoom);
+          socket.emit('getItem', roomItem);
         }
 
         // Set message to seen when second user connected to socket
@@ -144,17 +161,18 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           getCurrentRoom,
         );
 
-        this.clientSize = (
-          await this.server.of('/').in(String(getCurrentRoom)).allSockets()
-        ).size;
+        // Get the previous chat messages
+        this.server
+          .in(String(getCurrentRoom))
+          .emit('getRoomMessages', roomMessages);
 
-        socket.emit('getRoomMessages', roomMessages);
+        // Get info about forwarded user in a room
+        socket.emit('getUser', getUser);
       });
     });
   }
 
   handleDisconnect(client: any) {
     console.log('disconesso');
-    this.clientSize--;
   }
 }

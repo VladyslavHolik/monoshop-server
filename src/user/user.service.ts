@@ -5,13 +5,24 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { EditUserDto } from './dto/edit-user.dto';
 import * as bcrypt from 'bcrypt';
+import { StripeService } from 'src/stripe/stripe.service';
 
 @Injectable()
 export class UserService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private stripeService: StripeService,
+  ) {}
 
   async createUser(dto: CreateUserDto) {
-    const user = await this.prisma.user.create({ data: dto });
+    const stripeCustomer = await this.stripeService.createCustomer(
+      dto.fullName,
+      dto.email,
+    );
+
+    const user = await this.prisma.user.create({
+      data: { ...dto, stripeCustomerId: stripeCustomer.id },
+    });
     return user;
   }
 
@@ -56,6 +67,7 @@ export class UserService {
         image: true,
         phone: true,
         location: true,
+        lastActivity: true,
       },
     });
 
@@ -70,6 +82,14 @@ export class UserService {
     return await this.prisma.user.findUnique({
       where: {
         id,
+      },
+      select: {
+        fullName: true,
+        image: true,
+        lastActivity: true,
+        id: true,
+        phone: true,
+        location: true,
       },
     });
   }
@@ -100,6 +120,17 @@ export class UserService {
     if (isRefreshTokenMatching) {
       return user;
     }
+  }
+
+  async setLastActivity(userId: number) {
+    await this.prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        lastActivity: new Date(),
+      },
+    });
   }
 
   async createWithGoogle(email: string, fullName: string, image: string) {

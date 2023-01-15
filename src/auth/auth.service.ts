@@ -1,7 +1,9 @@
 import {
   BadRequestException,
   ForbiddenException,
+  forwardRef,
   Get,
+  Inject,
   Injectable,
   Req,
   UseGuards,
@@ -19,6 +21,7 @@ import JwtRefreshGuard from './jwt-refresh.guard';
 @Injectable()
 export class AuthService {
   constructor(
+    @Inject(forwardRef(() => UserService))
     private userService: UserService,
     private jwt: JwtService,
     private prisma: PrismaService,

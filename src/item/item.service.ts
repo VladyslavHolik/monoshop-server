@@ -303,6 +303,10 @@ export class ItemService {
   }
 
   async getItem(id: string) {
+    if (!id) {
+      throw new HttpException('No id provided', HttpStatus.BAD_REQUEST);
+    }
+
     const item = await this.prisma.item.findUnique({
       where: { id: Number(id) },
       select: {
@@ -341,6 +345,7 @@ export class ItemService {
       },
     });
 
+    // Take 5 items of the same user
     const userItems = await this.prisma.item.findMany({
       take: 5,
 

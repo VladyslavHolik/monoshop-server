@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
+import { UserService } from 'src/user/user.service';
 import { JwtAuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
 import { LoginUserDto } from './dto/login-user.dto';
@@ -17,7 +18,10 @@ import { AuthRequest } from './jwt.strategy';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private userService: UserService,
+  ) {}
 
   @Post('login')
   login(@Body() userDto: LoginUserDto, @Req() req, @Res() res) {
@@ -36,7 +40,8 @@ export class AuthController {
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
-  getMe(@Req() req: AuthRequest) {
+  async getMe(@Req() req: AuthRequest) {
+    await this.userService.setLastActivity(req.user.id);
     return req.user.id;
   }
 

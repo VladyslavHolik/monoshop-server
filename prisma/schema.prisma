@@ -26,6 +26,22 @@ model User {
   isRegisteredWithGoogle Boolean @default(false)
   room      Room[] 
   message Message[]
+  lastActivity DateTime @default(now())
+  stripeCustomerId String?
+}
+
+model Order {
+  id String @unique
+  sellerId String
+  city String
+  country String
+  line1 String
+  line2 String?
+  postalCode String
+  state String
+  customerId String
+  fullName String
+  phone String
 }
 
 enum Role {
@@ -71,7 +87,8 @@ model Item {
   gender Gender
   name String
   hashtags String[] @default([])
-  
+  room Room? @relation(fields: [roomId], references: [id]) 
+  roomId Int? @unique
 }
 
 model Colour {
@@ -113,8 +130,9 @@ model Brand {
 
 model Room {
   id   Int    @id @default(autoincrement())
-  users User[]
-  message Message[]
+  users User[] 
+  message Message[] 
+  item Item?
 }
 
 model Message {
