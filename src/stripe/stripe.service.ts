@@ -22,7 +22,7 @@ export class StripeService {
   }
 
   async updateCustomer(customerId: string, dto: CreateChargeDto) {
-    return await this.stripe.customers.update(customerId, {
+    await this.stripe.customers.update(customerId, {
       address: {
         city: dto.city,
         country: dto.country,
@@ -37,7 +37,13 @@ export class StripeService {
     });
   }
 
+  async retriveCustomer(customerId: string) {
+    return await this.stripe.customers.retrieve(customerId);
+  }
+
   async charge(userId: number, dto: CreateChargeDto) {
+    console.log(userId, dto);
+
     const item = await this.prisma.item.findUnique({
       where: {
         id: dto.itemId,
@@ -53,6 +59,7 @@ export class StripeService {
         id: userId,
       },
     });
+
     //update customer
     await this.updateCustomer(user.stripeCustomerId, dto);
 
@@ -64,19 +71,18 @@ export class StripeService {
       customer: user.stripeCustomerId,
       metadata: {
         seller_id: item.userId,
+        item_id: item.id,
+        user_id: userId,
       },
       line_items: [
         {
           quantity: 1,
           price_data: {
             currency: 'pln',
-            unit_amount: item.price * 100,
+            unit_amount: Number(item.price) * 100,
             product_data: {
               name: item.name,
               images: item.images,
-              metadata: {
-                id: item.id,
-              },
             },
           },
         },

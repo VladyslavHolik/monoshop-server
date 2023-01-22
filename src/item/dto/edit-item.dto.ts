@@ -34,7 +34,7 @@ export class EditItemDto {
   gender: Gender;
 
   @IsNotEmpty()
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: 2 })
   price: number;
 
   @IsNotEmpty()

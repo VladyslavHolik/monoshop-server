@@ -40,8 +40,7 @@ class CreateChargeDto {
 
   @IsNotEmpty()
   @IsNumber()
-  @Min(100000)
-  @Max(999999)
+  @Max(10000000)
   postalCode: number;
 
   @IsNotEmpty()

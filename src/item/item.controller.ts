@@ -21,21 +21,22 @@ import { EditItemDto } from './dto/edit-item.dto';
 import { SortBy } from './sort-by.enum';
 import { ItemService } from './item.service';
 import { ParseEnumPipe } from '@nestjs/common/pipes';
+import { FilterDto } from './dto/filter.dto';
 
-export interface IFilter {
-  price?: [number, number];
-  gender?: Gender;
-  category?: number;
-  subcategory?: number[];
-  size?: Size[];
-  condition?: number[];
-  brand?: string[];
-  style?: string[];
-  colour?: string[];
-  sortBy?: SortBy;
-  page: number;
-  search?: string;
-}
+// export interface IFilter {
+//   price?: [number, number];
+//   gender?: Gender;
+//   category?: number;
+//   subcategory?: number[];
+//   size?: Size[];
+//   condition?: number[];
+//   brand?: string[];
+//   style?: string[];
+//   colour?: string[];
+//   sortBy?: SortBy;
+//   page: number;
+//   search?: string;
+// }
 
 @Controller('item')
 export class ItemController {
@@ -50,71 +51,9 @@ export class ItemController {
 
   @Get()
   @UseGuards(OptionalJwtAuthGuard)
-  getAll(
-    @Query(
-      'price',
-      new ParseArrayPipe({ items: Number, separator: ',', optional: true }),
-    )
-    price: [number, number],
-    @Query(
-      'subcategory',
-      new ParseArrayPipe({ items: Number, separator: ',', optional: true }),
-    )
-    subcategory: number[],
-    @Query(
-      'condition',
-      new ParseArrayPipe({ items: Number, separator: ',', optional: true }),
-    )
-    condition: number[],
-    @Query(
-      'colour',
-      new ParseArrayPipe({ items: String, separator: ',', optional: true }),
-    )
-    colour: string[],
-    @Query(
-      'style',
-      new ParseArrayPipe({ items: String, separator: ',', optional: true }),
-    )
-    style: string[],
-    @Query(
-      'brand',
-      new ParseArrayPipe({ items: String, separator: ',', optional: true }),
-    )
-    brand: string[],
-    @Query(
-      'size',
-      new ParseArrayPipe({
-        items: String,
-        separator: ',',
-        optional: true,
-      }),
-    )
-    size: Size[],
-    @Query('category', new ParseIntPipe())
-    category: number,
-    @Query('gender') gender: Gender,
-    @Query('search') search: string,
-    @Query('sortBy', new ParseEnumPipe(SortBy)) sortBy: SortBy,
-    @Query('page') page: number,
-    @Req() req: AuthRequest,
-  ) {
-    return this.itemService.getAll(
-      {
-        price: price || [undefined, undefined],
-        condition: condition || undefined,
-        colour: colour || undefined,
-        style: style || undefined,
-        brand: brand || undefined,
-        size: size || undefined,
-        category: category || undefined,
-        subcategory: subcategory || undefined,
-        sortBy: sortBy || undefined,
-        gender: gender || undefined,
-        page: page,
-        search: search || '',
-      },
-      req.user.id,
-    );
+  getAll(@Query() dto: FilterDto, @Req() req: AuthRequest) {
+    console.log(dto, 'items');
+    return this.itemService.getAll(dto, req.user.id);
   }
 
   @Get('user')

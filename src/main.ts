@@ -11,9 +11,11 @@ async function bootstrap() {
       whitelist: true,
       transform: true,
       always: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
     }),
   );
-
   app.use(rawBodyMiddleware());
 
   app.use(cookieParser());

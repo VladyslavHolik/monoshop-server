@@ -64,6 +64,7 @@ export class UserService {
             size: true,
           },
         },
+        stripeCustomerId: true,
         image: true,
         phone: true,
         location: true,
@@ -134,12 +135,18 @@ export class UserService {
   }
 
   async createWithGoogle(email: string, fullName: string, image: string) {
+    const stripeCustomer = await this.stripeService.createCustomer(
+      fullName,
+      email,
+    );
+
     const newUser = await this.prisma.user.create({
       data: {
         email,
         fullName,
         isRegisteredWithGoogle: true,
         image,
+        stripeCustomerId: stripeCustomer.id,
       },
     });
     return newUser;

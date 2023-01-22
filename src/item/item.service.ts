@@ -8,9 +8,9 @@ import { Prisma, User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateItemDto } from './dto/create-item.dto';
 import { EditItemDto } from './dto/edit-item.dto';
-import { IFilter } from './item.controller';
 import { SortBy } from './sort-by.enum';
 import { FavoriteService } from 'src/favorite/favorite.service';
+import { FilterDto } from './dto/filter.dto';
 
 const getTotalPages = (totalItems: number, limit: number) => {
   return Math.ceil(totalItems / limit);
@@ -30,7 +30,7 @@ export class ItemService {
       data: {
         user: { connect: { id: userId } },
         condition: dto.condition,
-        price: dto.price,
+        price: Number(dto.price).toFixed(2),
         description: dto.description,
         brand: {
           connect: dto.brand.map((id) => ({ id })),
@@ -56,7 +56,7 @@ export class ItemService {
     return item;
   }
 
-  async getAll(query: IFilter, userId: number) {
+  async getAll(query: FilterDto, userId: number) {
     const {
       brand,
       category,
@@ -114,10 +114,12 @@ export class ItemService {
               },
             ]
           : undefined,
-        price: {
-          gt: price[0] - 1,
-          lt: price[1] + 1,
-        },
+        price: price
+          ? {
+              gt: price[0] - 1,
+              lt: price[1] + 1,
+            }
+          : undefined,
         category: {
           id: category,
         },
@@ -165,7 +167,7 @@ export class ItemService {
         },
       },
       take: ITEMS_LIMIT,
-      skip: (page - 1) * ITEMS_LIMIT,
+      skip: ((page || 1) - 1) * ITEMS_LIMIT,
       select: {
         images: true,
         price: true,
@@ -210,10 +212,12 @@ export class ItemService {
               },
             ]
           : undefined,
-        price: {
-          gt: price[0],
-          lt: price[1],
-        },
+        price: price
+          ? {
+              gt: price[0] - 1,
+              lt: price[1] + 1,
+            }
+          : undefined,
         category: {
           id: category,
         },
@@ -372,7 +376,7 @@ export class ItemService {
       where: { id: Number(id) },
       data: {
         condition: dto.condition,
-        price: dto.price,
+        price: Number(dto.price).toFixed(2),
         description: dto.description,
         brand: {
           connect: dto.brand.map((id) => ({ id })),

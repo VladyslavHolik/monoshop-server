@@ -27,21 +27,16 @@ model User {
   room      Room[] 
   message Message[]
   lastActivity DateTime @default(now())
-  stripeCustomerId String?
+  stripeCustomerId String
+  orders Order[]
 }
 
-model Order {
-  id String @unique
-  sellerId String
-  city String
-  country String
-  line1 String
-  line2 String?
-  postalCode String
-  state String
-  customerId String
-  fullName String
-  phone String
+enum OrderStatus {
+  REJECTED
+  SEND_WAIT
+  ON_THE_WAY
+  PICKUP_WAIT
+  DELIVERED
 }
 
 enum Role {
@@ -72,7 +67,7 @@ model Item {
   style         Style    @relation(fields: [styleId], references: [id])
   styleId       Int
   images        String[]
-  price         Int
+  price         Decimal
   description String?
   views Int @default(1)
   size          Size 
@@ -89,6 +84,27 @@ model Item {
   hashtags String[] @default([])
   room Room? @relation(fields: [roomId], references: [id]) 
   roomId Int? @unique
+  order Order?
+}
+
+model Order {
+  id String @unique
+  sellerId String
+  city String
+  country String
+  line1 String
+  line2 String?
+  postalCode String
+  state String
+  customerId String
+  user User @relation(fields: [userId], references: [id])
+  userId Int
+  fullName String
+  phone String
+  item Item @relation(fields: [itemId], references: [id])
+  itemId Int @unique
+  status OrderStatus @default(SEND_WAIT)
+  date DateTime @default(now())
 }
 
 model Colour {

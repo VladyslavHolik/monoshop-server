@@ -11,6 +11,7 @@ import {
   IsOptional,
   MinLength,
   MaxLength,
+  IsDecimal,
 } from 'class-validator';
 import { Colour, Gender, Size } from '@prisma/client';
 
@@ -33,7 +34,7 @@ export class CreateItemDto {
   gender: Gender;
 
   @IsNotEmpty()
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: 2 })
   price: number;
 
   @IsNotEmpty()

@@ -32,6 +32,12 @@ export class WebhookController {
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object as Stripe.Checkout.Session;
 
+      const customer = await this.stripeService.retriveCustomer(
+        session.customer as string,
+      );
+
+      const customerPhone = (customer as { phone: string }).phone;
+
       await this.prisma.order.create({
         data: {
           city: session.customer_details.address.city,
@@ -41,10 +47,16 @@ export class WebhookController {
           state: session.customer_details.address.state,
           postalCode: session.customer_details.address.postal_code,
           customerId: session.customer as string,
-          id: session.id,
+          user: { connect: { id: Number(session.metadata.user_id) } },
+          id: session.id, // Session is order id
           sellerId: session.metadata.seller_id,
           fullName: session.customer_details.name,
-          phone: session.customer_details.phone,
+          phone: customerPhone,
+          item: {
+            connect: {
+              id: Number(session.metadata.item_id),
+            },
+          },
         },
       });
     }
