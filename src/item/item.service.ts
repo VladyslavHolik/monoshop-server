@@ -11,6 +11,7 @@ import { EditItemDto } from './dto/edit-item.dto';
 import { SortBy } from './sort-by.enum';
 import { FavoriteService } from 'src/favorite/favorite.service';
 import { FilterDto } from './dto/filter.dto';
+import { UserService } from 'src/user/user.service';
 
 const getTotalPages = (totalItems: number, limit: number) => {
   return Math.ceil(totalItems / limit);
@@ -23,6 +24,7 @@ export class ItemService {
   constructor(
     private prisma: PrismaService,
     private favoriteService: FavoriteService,
+    private userService: UserService,
   ) {}
 
   async createItem(dto: CreateItemDto, userId: number) {
@@ -322,7 +324,11 @@ export class ItemService {
         colour: true,
         size: true,
         condition: true,
-        user: true,
+        user: {
+          select: {
+            id: true,
+          },
+        },
         price: true,
         style: true,
         description: true,
@@ -349,6 +355,8 @@ export class ItemService {
       },
     });
 
+    const user = await this.userService.getUserById(item.user.id);
+
     // Take 5 items of the same user
     const userItems = await this.prisma.item.findMany({
       take: 5,
@@ -368,7 +376,7 @@ export class ItemService {
       },
     });
 
-    return { ...item, userItems };
+    return { ...item, user, userItems };
   }
 
   async editItem(id: string, dto: EditItemDto) {

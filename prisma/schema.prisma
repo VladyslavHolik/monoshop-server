@@ -11,26 +11,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id        Int     @id @default(autoincrement())
-  email     String  @unique
-  fullName  String
-  password  String?
-  items     Item[]  @relation("items")
-  location  String?
-  phone     String?
-  image     String  @default("https://t4.ftcdn.net/jpg/01/86/29/31/360_F_186293166_P4yk3uXQBDapbDFlR17ivpM6B1ux0fHG.jpg")
-  role      Role    @default(USER)
-  favorites Item[]  @relation("favorites")
-  currentHashedRefreshToken String?
-  isRegisteredWithGoogle Boolean @default(false)
-  room      Room[] 
-  message Message[]
-  lastActivity DateTime @default(now())
-  stripeCustomerId String
-  orders Order[]
-}
-
 enum OrderStatus {
   REJECTED
   SEND_WAIT
@@ -57,6 +37,27 @@ enum Size {
   XL
   XXL
   XXXL
+}
+
+model User {
+  id        Int     @id @default(autoincrement())
+  email     String  @unique
+  fullName  String
+  password  String?
+  items     Item[]  @relation("items")
+  location  String?
+  phone     String?
+  image     String  @default("https://t4.ftcdn.net/jpg/01/86/29/31/360_F_186293166_P4yk3uXQBDapbDFlR17ivpM6B1ux0fHG.jpg")
+  role      Role    @default(USER)
+  favorites Item[]  @relation("favorites")
+  currentHashedRefreshToken String?
+  isRegisteredWithGoogle Boolean @default(false)
+  room      Room[] 
+  message Message[]
+  lastActivity DateTime @default(now())
+  stripeCustomerId String
+  orders Order[]
+  reviews Review[]
 }
 
 model Item {
@@ -104,6 +105,18 @@ model Order {
   item Item @relation(fields: [itemId], references: [id])
   itemId Int @unique
   status OrderStatus @default(SEND_WAIT)
+  date DateTime @default(now())
+  review Review?
+}
+
+model Review {
+  id   Int    @id @default(autoincrement())
+  user User @relation(fields: [userId], references: [id])
+  userId Int @unique
+  text String
+  order Order @relation(fields: [orderId], references: [id])
+  orderId String @unique
+  rating Int
   date DateTime @default(now())
 }
 

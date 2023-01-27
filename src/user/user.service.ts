@@ -69,6 +69,7 @@ export class UserService {
         phone: true,
         location: true,
         lastActivity: true,
+        id: true,
       },
     });
 
@@ -76,7 +77,48 @@ export class UserService {
       throw new BadRequestException('There is not user with this id');
     }
 
-    return user;
+    const reviewCount = await this.prisma.review.count({
+      where: {
+        AND: [
+          {
+            order: {
+              sellerId: {
+                equals: String(user.id),
+              },
+            },
+          },
+        ],
+      },
+    });
+
+    const reviewRating = async () => {
+      const ratings = await this.prisma.review.findMany({
+        where: {
+          AND: [
+            {
+              order: {
+                sellerId: {
+                  equals: String(user.id),
+                },
+              },
+            },
+          ],
+        },
+        select: {
+          rating: true,
+        },
+      });
+
+      let count = 0;
+
+      ratings.map((i) => {
+        count += i.rating;
+      });
+
+      return count / reviewCount;
+    };
+
+    return { ...user, reviewCount, reviewRating: await reviewRating() };
   }
 
   async getProfile(id: number) {

@@ -21,6 +21,7 @@ import { ChatModule } from './chat/chat.module';
 import { StripeModule } from './stripe/stripe.module';
 import { WebhookModule } from './webhook/webhook.module';
 import { OrderModule } from './order/order.module';
+import { ReviewModule } from './review/review.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { OrderModule } from './order/order.module';
     StripeModule,
     WebhookModule,
     OrderModule,
+    ReviewModule,
   ],
   controllers: [AuthController, UserController, ItemController],
   providers: [AuthService, JwtService, ItemService],

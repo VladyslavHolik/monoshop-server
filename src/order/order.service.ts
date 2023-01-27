@@ -63,6 +63,11 @@ export class OrderService {
         status: true,
         date: true,
         userId: true,
+        review: {
+          select: {
+            id: true,
+          },
+        },
       },
     });
   }
