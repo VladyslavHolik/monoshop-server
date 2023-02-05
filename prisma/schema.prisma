@@ -86,6 +86,9 @@ model Item {
   room Room? @relation(fields: [roomId], references: [id]) 
   roomId Int? @unique
   order Order?
+  selled Boolean @default(false)
+  cardNumber Int?
+  cardHolder String?
 }
 
 model Order {
@@ -107,6 +110,7 @@ model Order {
   status OrderStatus @default(SEND_WAIT)
   date DateTime @default(now())
   review Review?
+  
 }
 
 model Review {

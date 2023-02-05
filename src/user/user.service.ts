@@ -62,6 +62,7 @@ export class UserService {
             images: true,
             name: true,
             size: true,
+            selled: true,
           },
         },
         stripeCustomerId: true,

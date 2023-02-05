@@ -51,6 +51,9 @@ export class AuthService {
     return res.send({
       accessToken: accessToken,
       refreshToken: refreshToken,
+      photo: candidate.image,
+      fullName: candidate.fullName,
+      userId: candidate.id,
     });
   }
 
@@ -97,7 +100,7 @@ export class AuthService {
 
     const hashedPassword = await this.hashPassword(userDto.password);
 
-    return this.userService.createUser({
+    await this.userService.createUser({
       ...userDto,
       password: hashedPassword,
     });
@@ -158,6 +161,20 @@ export class AuthService {
     return {
       accessToken: accessToken,
       refreshToken: refreshToken,
+    };
+  }
+
+  async me(userId: number) {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        id: userId,
+      },
+    });
+
+    return {
+      photo: user.image,
+      fullName: user.fullName,
+      userId: user.id,
     };
   }
 }

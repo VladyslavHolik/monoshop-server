@@ -161,6 +161,7 @@ export class ItemService {
             },
           },
         ],
+        selled: false,
         gender: gender,
         colour: {
           value: {
@@ -260,6 +261,7 @@ export class ItemService {
           },
         ],
         gender: gender,
+        selled: false,
         colour: {
           value: {
             in: colour,
@@ -305,6 +307,12 @@ export class ItemService {
       orderBy: {
         id: 'desc',
       },
+      select: {
+        name: true,
+        images: true,
+        price: true,
+        selled: true,
+      },
     });
   }
 
@@ -336,6 +344,7 @@ export class ItemService {
         hashtags: true,
         subcategory: true,
         views: true,
+        selled: true,
       },
     });
 
@@ -380,6 +389,17 @@ export class ItemService {
   }
 
   async editItem(id: string, dto: EditItemDto) {
+    const item = await this.prisma.item.findFirst({
+      where: {
+        id: Number(id),
+        selled: false,
+      },
+    });
+
+    if (!item) {
+      throw new HttpException('Brand already exists', HttpStatus.FORBIDDEN);
+    }
+
     const editedItem = await this.prisma.item.update({
       where: { id: Number(id) },
       data: {
@@ -400,6 +420,7 @@ export class ItemService {
         subcategory: { connect: { id: dto.subcategoryId } },
       },
     });
+
     return editedItem;
   }
 
@@ -428,6 +449,13 @@ export class ItemService {
       take: 10,
       orderBy: {
         views: 'desc',
+      },
+      where: {
+        NOT: [
+          {
+            selled: true,
+          },
+        ],
       },
     });
 

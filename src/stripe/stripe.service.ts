@@ -44,14 +44,17 @@ export class StripeService {
   async charge(userId: number, dto: CreateChargeDto) {
     console.log(userId, dto);
 
-    const item = await this.prisma.item.findUnique({
+    const item = await this.prisma.item.findFirst({
       where: {
         id: dto.itemId,
+        selled: false,
       },
     });
 
     if (!item) {
-      throw new BadRequestException('There is no item with this id');
+      throw new BadRequestException(
+        'Selling item with current id does not exist',
+      );
     }
     // Search for user
     const user = await this.prisma.user.findUnique({

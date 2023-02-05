@@ -75,4 +75,15 @@ export class CreateItemDto {
   @MinLength(4)
   @MaxLength(50)
   name: string;
+
+  @IsNumber()
+  @IsNotEmpty()
+  @MinLength(16)
+  @MaxLength(19)
+  cardNumber: number;
+
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(50)
+  cardHolder: string;
 }

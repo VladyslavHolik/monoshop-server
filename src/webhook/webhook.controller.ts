@@ -38,6 +38,15 @@ export class WebhookController {
 
       const customerPhone = (customer as { phone: string }).phone;
 
+      await this.prisma.item.update({
+        where: {
+          id: Number(session.metadata.item_id),
+        },
+        data: {
+          selled: true,
+        },
+      });
+
       await this.prisma.order.create({
         data: {
           city: session.customer_details.address.city,

@@ -84,6 +84,27 @@ export class ReviewService {
           sellerId: String(userId),
         },
       },
+      select: {
+        order: {
+          select: {
+            item: {
+              select: {
+                images: true,
+              },
+            },
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            fullName: true,
+          },
+        },
+        text: true,
+        rating: true,
+        date: true,
+        id: true,
+      },
       take,
       skip,
     });

@@ -67,7 +67,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const user = await this.authService.verifyAndReturnUser(token);
 
       if (!user) {
-        console.log('USER IS NOT VALID');
         socket.disconnect();
         return;
       }
@@ -81,6 +80,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       socket.on('joinRoom', async (data: { user: string; item?: string }) => {
         const forwardedId = Number(data.user);
         const forwardedItemId = Number(data.item);
+
+        console.log('joined room', data.user, data.item);
 
         const isForwardedNaN = Number.isNaN(forwardedId);
         const isItemNan = Number.isNaN(forwardedItemId);

@@ -42,7 +42,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   async getMe(@Req() req: AuthRequest) {
     await this.userService.setLastActivity(req.user.id);
-    return req.user.id;
+    return this.authService.me(req.user.id);
   }
 
   @UseGuards(JwtRefreshGuard)
