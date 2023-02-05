@@ -56,7 +56,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   async handleConnection(socket: Socket) {
-    this.server.once('connection', async (socket) => {
       const token = socket.handshake.auth.token;
 
       if (!token) {
@@ -170,7 +169,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         // Get info about forwarded user in a room
         socket.emit('getUser', getUser);
       });
-    });
   }
 
   handleDisconnect(client: any) {
