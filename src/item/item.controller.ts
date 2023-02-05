@@ -52,7 +52,6 @@ export class ItemController {
   @Get()
   @UseGuards(OptionalJwtAuthGuard)
   getAll(@Query() dto: FilterDto, @Req() req: AuthRequest) {
-    console.log(dto, 'items');
     return this.itemService.getAll(dto, req.user.id);
   }
 

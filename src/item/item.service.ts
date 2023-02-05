@@ -125,7 +125,6 @@ export class ItemService {
         category: {
           id: category,
         },
-
         AND: [
           {
             subcategory: {
