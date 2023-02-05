@@ -50,4 +50,10 @@ export class AuthController {
   async refresh(@Req() request: AuthRequest) {
     return this.authService.refresh(request.user.id);
   }
+
+  @UseGuards(JwtRefreshGuard)
+  @Post('logout')
+  async logout(@Req() request: AuthRequest) {
+    return this.authService.logout(request.user.id);
+  }
 }
