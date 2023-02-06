@@ -438,6 +438,10 @@ export class ItemService {
       throw new HttpException('You do not have rights', HttpStatus.FORBIDDEN);
     }
 
+    if (candidate.selled) {
+      throw new HttpException('You can not delete the selling item', HttpStatus.FORBIDDEN);
+    }
+
     await this.prisma.item.delete({ where: { id: Number(id) } });
 
     return { message: 'Item deleted succsfully' };

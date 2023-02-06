@@ -33,6 +33,11 @@ export class UserController {
     return this.userService.getAllUsers();
   }
 
+  @Post('delete')
+  delete(@Body('id') id: number) {
+    return this.userService.delete(id);
+  }
+
   @Get('profile')
   @UseGuards(JwtAuthGuard)
   getProfile(@Req() req: AuthRequest) {

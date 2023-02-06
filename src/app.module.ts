@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthController } from './auth/auth.controller';
 import { AuthModule } from './auth/auth.module';
@@ -22,6 +22,8 @@ import { StripeModule } from './stripe/stripe.module';
 import { WebhookModule } from './webhook/webhook.module';
 import { OrderModule } from './order/order.module';
 import { ReviewModule } from './review/review.module';
+import { EmailModule } from './email/email.module';
+import { EmailService } from './email/email.service';
 
 @Module({
   imports: [
@@ -42,6 +44,7 @@ import { ReviewModule } from './review/review.module';
     WebhookModule,
     OrderModule,
     ReviewModule,
+    EmailModule,
   ],
   controllers: [AuthController, UserController, ItemController],
   providers: [AuthService, JwtService, ItemService],

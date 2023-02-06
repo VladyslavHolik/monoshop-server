@@ -7,6 +7,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import * as dotenv from 'dotenv';
 import { JwtRefreshTokenStrategy } from './jwt-refresh-token.strategy';
+import { EmailModule } from 'src/email/email.module';
 dotenv.config();
 
 @Module({
@@ -15,6 +16,7 @@ dotenv.config();
   imports: [
     PrismaModule,
     forwardRef(() => UserModule),
+    forwardRef(() => EmailModule),
     JwtModule,
     PassportModule,
   ],

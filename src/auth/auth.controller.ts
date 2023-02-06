@@ -7,7 +7,8 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { Response } from 'express';
+import { Request, Response } from 'express';
+import { EmailService } from 'src/email/email.service';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { UserService } from 'src/user/user.service';
 import { JwtAuthGuard } from './auth.guard';
@@ -19,18 +20,22 @@ import { AuthRequest } from './jwt.strategy';
 @Controller('auth')
 export class AuthController {
   constructor(
-    private authService: AuthService,
-    private userService: UserService,
+    private readonly authService: AuthService,
+    private readonly userService: UserService,
   ) {}
 
   @Post('login')
-  login(@Body() userDto: LoginUserDto, @Req() req, @Res() res) {
+  login(
+    @Body() userDto: LoginUserDto,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
     return this.authService.login(userDto, req, res);
   }
 
   @Post('register')
-  register(@Body() userDto: CreateUserDto) {
-    return this.authService.register(userDto);
+  async register(@Body() dto: CreateUserDto) {
+    this.authService.register(dto);
   }
 
   @Get('signout')

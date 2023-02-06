@@ -66,6 +66,7 @@ export class UserService {
           },
         },
         stripeCustomerId: true,
+        isEmailConfirmed: true,
         image: true,
         phone: true,
         location: true,
@@ -193,5 +194,24 @@ export class UserService {
       },
     });
     return newUser;
+  }
+
+  async delete(id: number) {
+    await this.prisma.user.delete({
+      where: {
+        id: id,
+      },
+    });
+  }
+
+  async markEmailAsConfirmed(email: string) {
+    return this.prisma.user.update({
+      where: {
+        email: email,
+      },
+      data: {
+        isEmailConfirmed: true,
+      },
+    });
   }
 }

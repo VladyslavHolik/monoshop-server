@@ -3,6 +3,8 @@ import {
   ForbiddenException,
   forwardRef,
   Get,
+  HttpException,
+  HttpStatus,
   Inject,
   Injectable,
   Req,
@@ -17,18 +19,22 @@ import { LoginUserDto } from './dto/login-user.dto';
 import { Request, Response } from 'express';
 import { AuthRequest, UserJwtPayload } from './jwt.strategy';
 import JwtRefreshGuard from './jwt-refresh.guard';
+import { EmailService } from 'src/email/email.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     @Inject(forwardRef(() => UserService))
+    @Inject(forwardRef(() => EmailService))
     private userService: UserService,
     private jwt: JwtService,
+    private emailService: EmailService,
     private prisma: PrismaService,
   ) {}
 
   async login(userDto: LoginUserDto, req: Request, res: Response) {
     const { email, password } = userDto;
+
     const candidate = await this.prisma.user.findUnique({
       where: { email: email },
     });
@@ -41,6 +47,15 @@ export class AuthService {
 
     if (!isMatch) {
       throw new BadRequestException('Wrong credentials');
+    }
+
+    if (!candidate.isEmailConfirmed) {
+      await this.emailService.resendConfirmationLink(candidate.id);
+
+      throw new HttpException(
+        'Please confirm email adress',
+        HttpStatus.UNAUTHORIZED,
+      );
     }
 
     const accessToken = this.getAccessToken(candidate.id);
@@ -57,22 +72,23 @@ export class AuthService {
     });
   }
 
-  getRefreshToken(id: number) {
-    const payload = { id };
-    const token = this.jwt.sign(payload, {
+  sign(payload: { id: number }) {
+    return this.jwt.sign(payload, {
       secret: process.env.JWT_REFRESH_TOKEN_SECRET,
       expiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRATION_TIME,
     });
+  }
+
+  getRefreshToken(id: number) {
+    const payload = { id };
+    const token = this.sign(payload);
 
     return token;
   }
 
   getAccessToken(id: number) {
     const payload = { id };
-    const token = this.jwt.sign(payload, {
-      secret: process.env.JWT_ACCESS_TOKEN_SECRET,
-      expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRATION_TIME,
-    });
+    const token = this.sign(payload);
 
     return token;
   }
@@ -95,7 +111,10 @@ export class AuthService {
     });
 
     if (candidate) {
-      throw new BadRequestException('User with this email already exists');
+      throw new HttpException(
+        'User with that email already exists',
+        HttpStatus.FORBIDDEN,
+      );
     }
 
     const hashedPassword = await this.hashPassword(userDto.password);
@@ -104,6 +123,8 @@ export class AuthService {
       ...userDto,
       password: hashedPassword,
     });
+
+    await this.emailService.sendVerificationLink(userDto.email);
   }
 
   async signout(req: Request, res: Response) {

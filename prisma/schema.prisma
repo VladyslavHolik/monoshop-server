@@ -58,6 +58,7 @@ model User {
   stripeCustomerId String
   orders Order[]
   reviews Review[]
+  isEmailConfirmed Boolean @default(false)
 }
 
 model Item {
