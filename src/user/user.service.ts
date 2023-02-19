@@ -23,6 +23,7 @@ export class UserService {
     const user = await this.prisma.user.create({
       data: { ...dto, stripeCustomerId: stripeCustomer.id },
     });
+
     return user;
   }
 
@@ -160,8 +161,6 @@ export class UserService {
       user.currentHashedRefreshToken,
     );
 
-    console.log(isRefreshTokenMatching);
-
     if (isRefreshTokenMatching) {
       return user;
     }
@@ -189,6 +188,7 @@ export class UserService {
         email,
         fullName,
         isRegisteredWithGoogle: true,
+        isEmailConfirmed: true,
         image,
         stripeCustomerId: stripeCustomer.id,
       },

@@ -28,13 +28,12 @@ export class AuthService {
     @Inject(forwardRef(() => EmailService))
     private userService: UserService,
     private jwt: JwtService,
-    private emailService: EmailService,
     private prisma: PrismaService,
+    private emailService: EmailService,
   ) {}
 
   async login(userDto: LoginUserDto, req: Request, res: Response) {
     const { email, password } = userDto;
-
     const candidate = await this.prisma.user.findUnique({
       where: { email: email },
     });
@@ -72,23 +71,22 @@ export class AuthService {
     });
   }
 
-  sign(payload: { id: number }) {
-    return this.jwt.sign(payload, {
+  getRefreshToken(id: number) {
+    const payload = { id };
+    const token = this.jwt.sign(payload, {
       secret: process.env.JWT_REFRESH_TOKEN_SECRET,
       expiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRATION_TIME,
     });
-  }
-
-  getRefreshToken(id: number) {
-    const payload = { id };
-    const token = this.sign(payload);
 
     return token;
   }
 
   getAccessToken(id: number) {
     const payload = { id };
-    const token = this.sign(payload);
+    const token = this.jwt.sign(payload, {
+      secret: process.env.JWT_ACCESS_TOKEN_SECRET,
+      expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRATION_TIME,
+    });
 
     return token;
   }
@@ -111,20 +109,19 @@ export class AuthService {
     });
 
     if (candidate) {
-      throw new HttpException(
-        'User with that email already exists',
-        HttpStatus.FORBIDDEN,
-      );
+      throw new BadRequestException('User with this email already exists');
     }
 
     const hashedPassword = await this.hashPassword(userDto.password);
+
+    await this.emailService.sendVerificationLink(userDto.email);
 
     await this.userService.createUser({
       ...userDto,
       password: hashedPassword,
     });
 
-    await this.emailService.sendVerificationLink(userDto.email);
+    return { message: 'User succesfuly registered' };
   }
 
   async signout(req: Request, res: Response) {

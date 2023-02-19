@@ -311,6 +311,7 @@ export class ItemService {
         images: true,
         price: true,
         selled: true,
+        id: true,
       },
     });
   }
@@ -373,6 +374,7 @@ export class ItemService {
         userId: {
           equals: item.user.id,
         },
+        selled: false,
         NOT: [
           {
             id: item.id,
@@ -439,7 +441,10 @@ export class ItemService {
     }
 
     if (candidate.selled) {
-      throw new HttpException('You can not delete the selling item', HttpStatus.FORBIDDEN);
+      throw new HttpException(
+        'You can not delete the selling item',
+        HttpStatus.FORBIDDEN,
+      );
     }
 
     await this.prisma.item.delete({ where: { id: Number(id) } });

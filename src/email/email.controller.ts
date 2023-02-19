@@ -13,7 +13,7 @@ export class EmailController {
     const email = await this.emailService.decodeConfirmationToken(
       confirmationData.token,
     );
-    await this.emailService.confirmEmail(email);
+    return await this.emailService.confirmEmail(email);
   }
 
   // @Post('resend-confirmation-link')

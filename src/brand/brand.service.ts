@@ -20,7 +20,7 @@ export class BrandService {
 
   async getAll(search: string) {
     const brands = await this.prisma.brand.findMany({
-      select: { value: true, id: true },
+      select: { value: true, id: true, image: true },
       where: {
         value: {
           contains: search ? search : undefined,

@@ -12,6 +12,7 @@ import {
   MinLength,
   MaxLength,
   IsDecimal,
+  IsCreditCard,
 } from 'class-validator';
 import { Colour, Gender, Size } from '@prisma/client';
 
@@ -76,11 +77,11 @@ export class CreateItemDto {
   @MaxLength(50)
   name: string;
 
-  @IsNumber()
   @IsNotEmpty()
+  @IsString()
   @MinLength(16)
-  @MaxLength(19)
-  cardNumber: number;
+  @MaxLength(16)
+  cardNumber: string;
 
   @IsString()
   @IsNotEmpty()

@@ -17,6 +17,7 @@ export class JwtRefreshTokenStrategy extends PassportStrategy(
       passReqToCallback: true,
     });
   }
+
   async validate(request: Request, payload: UserJwtPayload) {
     const refreshToken = request.get('Authorization').split(' ')[1];
 
